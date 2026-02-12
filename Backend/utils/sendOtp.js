@@ -11,7 +11,7 @@ exports.sendOtp = async (email, otp) => {
 
   await transporter.sendMail({
     from: process.env.EMAIL,
-    to: "harshitahirwar25@gmail.com",
+    to: "",
     subject: "HireHelper OTP Verification",
     text: `Your OTP is ${otp}`
   });
