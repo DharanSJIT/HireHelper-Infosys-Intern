@@ -1,8 +1,19 @@
+require("dotenv").config();
 const express = require("express");
-const mongoose = require("mongoose");
+const connectDB = require("./config/connectDB");
+const UserSchema = require("./Models/User.js");
+const authRoutes = require("./routes/authRoutes.js");
 
 const app = express();
 
-app.listen(3000,(req,res)=>{
-    console.log("Server is running on port 3000");
+connectDB();
+
+app.use(express.urlencoded({extended:true}));
+app.use(express.json());
+
+app.use("/api/auth",authRoutes);
+
+const PORT = process.env.PORT;
+app.listen(PORT,()=>{
+    console.log(`Server running on port ${PORT}`);
 });
