@@ -9,7 +9,7 @@ exports.register = async (req, res) => {
     const { first_name, last_name, email_id, password } = req.body;
     const existingUser = await User.findOne({ email_id });
 
-    if (existingUser) {
+    if (existingUser && existingUser.isVerified) {
       return res.status(400).json({ message: "User already exists" });
     }
 
@@ -118,6 +118,57 @@ exports.resendOtp = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email_id } = req.body;
+
+    const user = await User.findOne({ email_id });
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const otp = generateOtp();
+
+    user.otp = otp;
+    user.otpExpiry = Date.now() + 5 * 60 * 1000;
+
+    await user.save();
+
+    await sendOtp(email_id, otp);
+
+    res.json({ message: "Password reset OTP sent to email" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email_id, otp, newPassword } = req.body;
+
+    const user = await User.findOne({ email_id });
+
+    if (!user)
+      return res.status(404).json({ message: "User not found" });
+
+    if (user.otp !== otp || user.otpExpiry < Date.now())
+      return res.status(400).json({ message: "Invalid or expired OTP" });
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    user.otp = null;
+    user.otpExpiry = null;
+
+    await user.save();
+
+    res.json({ message: "Password reset successful" });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
 exports.getProfile = async (req, res) => {
   try {
