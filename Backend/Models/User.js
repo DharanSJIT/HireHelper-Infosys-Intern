@@ -39,6 +39,11 @@ const userSchema = new mongoose.Schema(
       default: "",
     },
 
+    profilePicture: {
+      type: String,
+      default: null
+    },
+
     isVerified: {
       type: Boolean,
       default: false,
@@ -48,7 +53,7 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
-
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
+module.exports = mongoose.model("User", userSchema);

@@ -16,5 +16,6 @@ export const register = (data) => API.post('/register', data);
 export const verifyOtp = (data) => API.post('/verify-otp', data);
 export const login = (data) => API.post('/login', data);
 export const getProfile = () => API.get('/profile');
+export const updateProfilePicture = (data) => API.put('/profile-picture', data);
 
 export default API;

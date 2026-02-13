@@ -1,23 +1,86 @@
 import React, { useState, useEffect } from 'react';
-import { getProfile } from '../config/api';
+import { getProfile, updateProfilePicture } from '../config/api';
 
 export default function Settings() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const { data } = await getProfile();
-        setUser(data);
-      } catch (error) {
-        console.error('Failed to fetch profile:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchProfile();
   }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const { data } = await getProfile();
+      setUser(data);
+    } catch (error) {
+      console.error('Failed to fetch profile:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size should be less than 5MB');
+      return;
+    }
+
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      try {
+        // Compress image before upload
+        const img = new Image();
+        img.src = reader.result;
+        img.onload = async () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          const compressedImage = canvas.toDataURL('image/jpeg', 0.7);
+          
+          try {
+            const { data } = await updateProfilePicture({ profilePicture: compressedImage });
+            setUser(data);
+          } catch (error) {
+            console.error('Failed to upload image:', error);
+            alert('Failed to upload image');
+          } finally {
+            setUploading(false);
+          }
+        };
+      } catch (error) {
+        console.error('Failed to process image:', error);
+        alert('Failed to process image');
+        setUploading(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   if (loading) {
     return (
@@ -39,8 +102,35 @@ export default function Settings() {
         <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full border border-white/10"></div>
         
         <div className="relative z-10 flex items-center gap-6">
-          <div className="w-24 h-24 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white text-3xl font-semibold border border-white/20 shadow-xl">
-            {user?.first_name?.[0]}{user?.last_name?.[0]}
+          <div className="relative group">
+            {user?.profilePicture ? (
+              <img
+                src={user.profilePicture}
+                alt="Profile"
+                className="w-24 h-24 rounded-2xl object-cover border-2 border-white/20 shadow-xl"
+              />
+            ) : (
+              <div className="w-24 h-24 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center text-white text-3xl font-semibold border border-white/20 shadow-xl">
+                {user?.first_name?.[0]}{user?.last_name?.[0]}
+              </div>
+            )}
+            <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+                disabled={uploading}
+              />
+              {uploading ? (
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+              ) : (
+                <svg viewBox="0 0 24 24" strokeWidth="2" className="w-6 h-6 stroke-white fill-none">
+                  <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              )}
+            </label>
           </div>
           <div className="flex-1">
             <h2 className="text-3xl font-['Playfair_Display'] font-semibold mb-2">
