@@ -65,9 +65,6 @@ exports.login = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    console.log("User Found:", user);
-    console.log("isVerified:", user.isVerified);
-
     if (!user.isVerified)
       return res
         .status(400)
@@ -82,7 +79,41 @@ exports.login = async (req, res) => {
       expiresIn: "7d",
     });
 
-    res.json({ token });
+    res.json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        first_name: user.first_name,
+        email_id: user.email_id,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.resendOtp = async (req, res) => {
+  try {
+    const { email_id } = req.body;
+
+    const user = await User.findOne({ email_id });
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.isVerified)
+      return res.status(400).json({ message: "User already verified" });
+
+    const otp = generateOtp();
+
+    user.otp = otp;
+    user.otpExpiry = Date.now() + 5 * 60 * 1000;
+
+    await user.save();
+
+    await sendOtp(email_id, otp);
+
+    res.json({ message: "OTP resent successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -90,7 +121,9 @@ exports.login = async (req, res) => {
 
 exports.getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password -otp -otpExpiry");
+    const user = await User.findById(req.user.id).select(
+      "-password -otp -otpExpiry",
+    );
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
