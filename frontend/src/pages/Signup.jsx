@@ -1,11 +1,16 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { register } from "../config/api";
 
 export default function Signup() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -15,7 +20,14 @@ export default function Signup() {
     e.preventDefault();
     setError("");
 
-    if (!email || !password || !confirmPassword) {
+    if (
+      !firstName ||
+      !lastName ||
+      !phoneNumber ||
+      !email ||
+      !password ||
+      !confirmPassword
+    ) {
       setError("Please fill in all fields.");
       return;
     }
@@ -30,13 +42,24 @@ export default function Signup() {
       return;
     }
 
-    console.log("Signup attempt:", { email, password });
-    navigate("/");
+    setLoading(true);
+    try {
+      await register({
+        first_name: firstName,
+        last_name: lastName,
+        email_id: email,
+        password,
+      });
+      navigate("/verify-otp", { state: { email } });
+    } catch (err) {
+      setError(err.response?.data?.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="w-screen h-screen overflow-hidden bg-[#F7F5F2] flex flex-col md:flex-row font-['DM_Sans'] text-[#1a1a1a]">
-
       {/* ── Left decorative panel ── */}
       <div className="w-full md:w-[45%] bg-[#111111] flex flex-col justify-between px-[52px] py-[56px] relative overflow-hidden min-h-[180px] md:min-h-0">
         {/* Decorative circles via pseudo-like divs */}
@@ -45,8 +68,15 @@ export default function Signup() {
 
         {/* Brand mark */}
         <div className="relative z-10 flex items-center gap-3">
-          <div className="w-9 h-9 border border-white/90 rounded-lg flex items-center justify-center" style={{ borderWidth: "1.5px" }}>
-            <svg viewBox="0 0 24 24" strokeWidth="1.5" className="w-[18px] h-[18px] stroke-white fill-none">
+          <div
+            className="w-9 h-9 border border-white/90 rounded-lg flex items-center justify-center"
+            style={{ borderWidth: "1.5px" }}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              className="w-[18px] h-[18px] stroke-white fill-none"
+            >
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
             </svg>
           </div>
@@ -58,12 +88,14 @@ export default function Signup() {
         {/* Tagline — hidden on mobile */}
         <div className="relative z-10 hidden md:block">
           <h2 className="font-['Playfair_Display'] font-normal text-[clamp(32px,3.5vw,46px)] leading-[1.18] text-white mb-5 tracking-[-0.01em]">
-            Join our<br />
+            Join our
+            <br />
             <em className="italic text-white/50">community.</em>
           </h2>
           <div className="w-10 h-px bg-white/30 mb-5" />
           <p className="text-sm font-light text-white/[0.45] leading-[1.7] max-w-[280px]">
-            Create your account and start your journey with professionals who value excellence and growth.
+            Create your account and start your journey with professionals who
+            value excellence and growth.
           </p>
         </div>
 
@@ -76,7 +108,6 @@ export default function Signup() {
       {/* ── Right form panel ── */}
       <div className="flex-1 flex flex-col justify-center items-center px-7 py-10 md:px-12 md:py-[60px] overflow-y-auto">
         <div className="w-full max-w-[400px]">
-
           {/* Back link */}
           <Link
             to="/"
@@ -105,7 +136,11 @@ export default function Signup() {
           {/* Error box */}
           {error && (
             <div className="flex items-center gap-2.5 bg-[#fff5f5] border border-[#ffd0d0] border-l-[3px] border-l-[#e53e3e] px-3.5 py-3 rounded-[6px] mb-6 text-[13.5px] text-[#c53030] animate-[errorIn_0.2s_ease]">
-              <svg viewBox="0 0 24 24" strokeWidth="1.8" className="w-[15px] h-[15px] stroke-current fill-none flex-shrink-0">
+              <svg
+                viewBox="0 0 24 24"
+                strokeWidth="1.8"
+                className="w-[15px] h-[15px] stroke-current fill-none flex-shrink-0"
+              >
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -115,6 +150,75 @@ export default function Signup() {
           )}
 
           <form onSubmit={handleSignup}>
+            {/* First Name */}
+            <div className="mb-6">
+              <label
+                htmlFor="firstName"
+                className={`block text-[11px] font-medium tracking-[0.14em] uppercase mb-2.5 transition-colors duration-200 ${
+                  focused === "firstName" ? "text-[#111]" : "text-[#555]"
+                }`}
+              >
+                First name
+              </label>
+              <input
+                id="firstName"
+                type="text"
+                placeholder="John"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                onFocus={() => setFocused("firstName")}
+                onBlur={() => setFocused("")}
+                className="w-full px-4 py-[14px] font-['DM_Sans'] text-[15px] font-normal text-[#111] bg-white border border-[#e0ddd9] rounded-[6px] outline-none transition-all duration-200 placeholder:text-[#bbb] focus:border-[#111] focus:shadow-[0_0_0_3px_rgba(17,17,17,0.05)] appearance-none"
+                style={{ borderWidth: "1.5px" }}
+              />
+            </div>
+
+            {/* Last Name */}
+            <div className="mb-6">
+              <label
+                htmlFor="lastName"
+                className={`block text-[11px] font-medium tracking-[0.14em] uppercase mb-2.5 transition-colors duration-200 ${
+                  focused === "lastName" ? "text-[#111]" : "text-[#555]"
+                }`}
+              >
+                Last name
+              </label>
+              <input
+                id="lastName"
+                type="text"
+                placeholder="Doe"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                onFocus={() => setFocused("lastName")}
+                onBlur={() => setFocused("")}
+                className="w-full px-4 py-[14px] font-['DM_Sans'] text-[15px] font-normal text-[#111] bg-white border border-[#e0ddd9] rounded-[6px] outline-none transition-all duration-200 placeholder:text-[#bbb] focus:border-[#111] focus:shadow-[0_0_0_3px_rgba(17,17,17,0.05)] appearance-none"
+                style={{ borderWidth: "1.5px" }}
+              />
+            </div>
+
+            {/* Phone Number */}
+            <div className="mb-6">
+              <label
+                htmlFor="phoneNumber"
+                className={`block text-[11px] font-medium tracking-[0.14em] uppercase mb-2.5 transition-colors duration-200 ${
+                  focused === "phoneNumber" ? "text-[#111]" : "text-[#555]"
+                }`}
+              >
+                Phone number
+              </label>
+              <input
+                id="phoneNumber"
+                type="tel"
+                placeholder="+1 (555) 000-0000"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                onFocus={() => setFocused("phoneNumber")}
+                onBlur={() => setFocused("")}
+                className="w-full px-4 py-[14px] font-['DM_Sans'] text-[15px] font-normal text-[#111] bg-white border border-[#e0ddd9] rounded-[6px] outline-none transition-all duration-200 placeholder:text-[#bbb] focus:border-[#111] focus:shadow-[0_0_0_3px_rgba(17,17,17,0.05)] appearance-none"
+                style={{ borderWidth: "1.5px" }}
+              />
+            </div>
+
             {/* Email */}
             <div className="mb-6">
               <label
@@ -169,12 +273,20 @@ export default function Signup() {
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-1 text-[#999] flex items-center hover:text-[#111] transition-colors duration-200"
                 >
                   {showPassword ? (
-                    <svg viewBox="0 0 24 24" strokeWidth="1.8" className="w-[18px] h-[18px] stroke-current fill-none">
+                    <svg
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.8"
+                      className="w-[18px] h-[18px] stroke-current fill-none"
+                    >
                       <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
                       <line x1="1" y1="1" x2="23" y2="23" />
                     </svg>
                   ) : (
-                    <svg viewBox="0 0 24 24" strokeWidth="1.8" className="w-[18px] h-[18px] stroke-current fill-none">
+                    <svg
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.8"
+                      className="w-[18px] h-[18px] stroke-current fill-none"
+                    >
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                       <circle cx="12" cy="12" r="3" />
                     </svg>
@@ -209,16 +321,26 @@ export default function Signup() {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((v) => !v)}
-                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  aria-label={
+                    showConfirmPassword ? "Hide password" : "Show password"
+                  }
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer p-1 text-[#999] flex items-center hover:text-[#111] transition-colors duration-200"
                 >
                   {showConfirmPassword ? (
-                    <svg viewBox="0 0 24 24" strokeWidth="1.8" className="w-[18px] h-[18px] stroke-current fill-none">
+                    <svg
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.8"
+                      className="w-[18px] h-[18px] stroke-current fill-none"
+                    >
                       <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
                       <line x1="1" y1="1" x2="23" y2="23" />
                     </svg>
                   ) : (
-                    <svg viewBox="0 0 24 24" strokeWidth="1.8" className="w-[18px] h-[18px] stroke-current fill-none">
+                    <svg
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.8"
+                      className="w-[18px] h-[18px] stroke-current fill-none"
+                    >
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                       <circle cx="12" cy="12" r="3" />
                     </svg>
@@ -230,9 +352,10 @@ export default function Signup() {
             {/* Submit */}
             <button
               type="submit"
-              className="w-full py-[15px] px-6 mt-2 bg-[#111111] text-white border-none rounded-[6px] font-['DM_Sans'] text-[13.5px] font-medium tracking-[0.12em] uppercase cursor-pointer transition-all duration-200 hover:bg-[#2a2a2a] hover:shadow-[0_6px_20px_rgba(0,0,0,0.18)] active:scale-[0.99]"
+              disabled={loading}
+              className="w-full py-[15px] px-6 mt-2 bg-[#111111] text-white border-none rounded-[6px] font-['DM_Sans'] text-[13.5px] font-medium tracking-[0.12em] uppercase cursor-pointer transition-all duration-200 hover:bg-[#2a2a2a] hover:shadow-[0_6px_20px_rgba(0,0,0,0.18)] active:scale-[0.99] disabled:opacity-50"
             >
-              Create Account
+              {loading ? "Creating..." : "Create Account"}
             </button>
           </form>
 
@@ -246,7 +369,6 @@ export default function Signup() {
               Sign in
             </Link>
           </div>
-
         </div>
       </div>
 

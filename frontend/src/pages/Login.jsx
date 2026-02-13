@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { login } from "../config/api";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [focused, setFocused] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
@@ -16,8 +18,16 @@ export default function Login() {
       setError("Please fill in all fields.");
       return;
     }
-    console.log("Login attempt:", { email, password });
-    navigate("/");
+    setLoading(true);
+    try {
+      const { data } = await login({ email_id: email, password });
+      localStorage.setItem("token", data.token);
+      navigate("/");
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -183,9 +193,10 @@ export default function Login() {
 
             <button
               type="submit"
-              className="w-full py-3.5 px-6 bg-[#111111] text-white border-none rounded-lg font-['DM_Sans'] text-sm font-medium tracking-[0.12em] uppercase cursor-pointer transition-all duration-200 mt-2 relative overflow-hidden hover:bg-[#2a2a2a] hover:shadow-[0_6px_20px_rgba(0,0,0,0.18)] active:scale-[0.99]"
+              disabled={loading}
+              className="w-full py-3.5 px-6 bg-[#111111] text-white border-none rounded-lg font-['DM_Sans'] text-sm font-medium tracking-[0.12em] uppercase cursor-pointer transition-all duration-200 mt-2 relative overflow-hidden hover:bg-[#2a2a2a] hover:shadow-[0_6px_20px_rgba(0,0,0,0.18)] active:scale-[0.99] disabled:opacity-50"
             >
-              Continue
+              {loading ? "Signing in..." : "Continue"}
             </button>
           </form>
 
