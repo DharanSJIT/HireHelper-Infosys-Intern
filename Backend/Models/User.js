@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema(
     id: {
       type: String,
       default: uuidv4,
-      unique: true
+      unique: true,
     },
 
     first_name: {
@@ -19,33 +19,35 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
-    phone_number:{
-      type:Number
+    phone_number: {
+      type: Number,
     },
 
     email_id: {
       type: String,
       required: true,
-      unique: true
+      unique: true,
     },
 
     password: {
       type: String,
-      required: true
+      required: true,
+    },
+
+    profilePicture: {
+      type: String,
+      default: "",
     },
 
     isVerified: {
       type: Boolean,
-      default: false
+      default: false,
     },
     otp: String,
-    otpExpiry: Date
+    otpExpiry: Date,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
-
-module.exports = mongoose.model("User", userSchema);
-
 
 const User = mongoose.model("User", userSchema);
 
