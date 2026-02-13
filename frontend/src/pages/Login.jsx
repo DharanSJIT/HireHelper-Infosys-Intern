@@ -22,7 +22,7 @@ export default function Login() {
     try {
       const { data } = await login({ email_id: email, password });
       localStorage.setItem("token", data.token);
-      navigate("/");
+      navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     } finally {
