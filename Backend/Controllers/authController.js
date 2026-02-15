@@ -183,3 +183,17 @@ exports.getProfile = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.updateProfilePicture = async (req, res) => {
+  try {
+    const { profilePicture } = req.body;
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { profilePicture },
+      { new: true }
+    ).select("-password -otp -otpExpiry");
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

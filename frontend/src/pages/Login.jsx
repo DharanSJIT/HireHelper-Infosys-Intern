@@ -229,7 +229,12 @@ export default function Login() {
               Create one
             </Link>
             {" · "}
-            
+            <Link
+              to="/forgot-password"
+              className="text-[#111] font-medium no-underline border-b border-[#111]/25 hover:border-[#111] transition-colors duration-200"
+            >
+              Forgot password?
+            </Link>
           </div>
         </div>
       </div>
