@@ -50,7 +50,11 @@ exports.verifyOtp = async (req, res) => {
 
     await user.save();
 
-    res.json({ message: "Account verified successfully" });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.json({ message: "Account verified successfully", token });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
