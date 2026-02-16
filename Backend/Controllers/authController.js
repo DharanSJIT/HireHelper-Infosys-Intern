@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { generateOtp } = require("../utils/generateOtp");
 const { sendOtp } = require("../utils/sendOtp");
+const cloudinary = require("../config/cloudinary");
 
 exports.register = async (req, res) => {
   try {
@@ -187,11 +188,21 @@ exports.getProfile = async (req, res) => {
 exports.updateProfilePicture = async (req, res) => {
   try {
     const { profilePicture } = req.body;
+    
+    const uploadResult = await cloudinary.uploader.upload(profilePicture, {
+      folder: 'hirehelper/profiles',
+      transformation: [
+        { width: 500, height: 500, crop: 'fill' },
+        { quality: 'auto' }
+      ]
+    });
+
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { profilePicture },
+      { profilePicture: uploadResult.secure_url },
       { new: true }
     ).select("-password -otp -otpExpiry");
+    
     res.json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });
