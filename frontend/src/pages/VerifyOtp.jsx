@@ -1,14 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { verifyOtp } from "../config/api";
+import { verifyOtp, resendOtp } from "../config/api";
 
 export default function VerifyOtp() {
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [countdown, setCountdown] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email;
+
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [countdown]);
 
   const handleVerify = async (e) => {
     e.preventDefault();
@@ -19,8 +29,9 @@ export default function VerifyOtp() {
     setLoading(true);
     setError("");
     try {
-      await verifyOtp({ email_id: email, otp });
-      navigate("/login");
+      const { data } = await verifyOtp({ email_id: email, otp });
+      localStorage.setItem('token', data.token);
+      navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Verification failed");
     } finally {
@@ -28,27 +39,124 @@ export default function VerifyOtp() {
     }
   };
 
+  const handleResend = async () => {
+    setResending(true);
+    setError("");
+    setSuccess("");
+    try {
+      await resendOtp({ email_id: email });
+      setSuccess("OTP resent successfully!");
+      setCountdown(60);
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to resend OTP");
+    } finally {
+      setResending(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#F7F5F2] flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
-        <h1 className="text-2xl font-semibold mb-6">Verify OTP</h1>
-        {error && <div className="bg-red-50 text-red-600 p-3 rounded mb-4">{error}</div>}
-        <form onSubmit={handleVerify}>
-          <input
-            type="text"
-            placeholder="Enter OTP"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            className="w-full px-4 py-3 border rounded-lg mb-4"
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[#111] text-white py-3 rounded-lg disabled:opacity-50"
-          >
-            {loading ? "Verifying..." : "Verify"}
-          </button>
-        </form>
+    <div className="min-h-screen bg-[#F7F5F2] flex flex-col md:flex-row font-['DM_Sans'] text-[#1a1a1a]">
+      <div className="w-full md:w-[45%] bg-[#111111] flex flex-col justify-between p-14 relative overflow-hidden">
+        <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full border border-white/[0.06]"></div>
+        <div className="absolute -bottom-16 -left-16 w-60 h-60 rounded-full border border-white/[0.05]"></div>
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 border border-white/90 rounded-lg flex items-center justify-center">
+              <svg viewBox="0 0 24 24" strokeWidth="1.5" className="w-[18px] h-[18px] stroke-white fill-none">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              </svg>
+            </div>
+            <span className="font-['DM_Sans'] font-medium text-sm tracking-[0.12em] uppercase text-white/90">HireHelper</span>
+          </div>
+        </div>
+
+        <div className="relative z-10 hidden md:block">
+          <h2 className="font-['Playfair_Display'] font-normal text-[clamp(32px,3.5vw,46px)] leading-[1.18] text-white mb-5 tracking-[-0.01em]">
+            Almost there,<br />
+            <em className="italic text-white/50">verify your email.</em>
+          </h2>
+          <div className="w-10 h-px bg-white/30 mb-5"></div>
+          <p className="text-sm font-light text-white/[0.45] leading-[1.7] max-w-[280px]">
+            We've sent a 6-digit code to {email}. Enter it below to complete your registration.
+          </p>
+        </div>
+
+        <div className="relative z-10 text-xs text-white/[0.20] tracking-[0.08em]">
+          © 2025 HireHelper Inc. All rights reserved.
+        </div>
+      </div>
+
+      <div className="flex-1 flex flex-col justify-center items-center p-12">
+        <div className="w-full max-w-[400px]">
+          <div className="mb-10">
+            <p className="text-[11px] font-medium tracking-[0.2em] uppercase text-[#999] mb-2.5">Email Verification</p>
+            <h1 className="font-['Playfair_Display'] text-3xl md:text-4xl font-semibold text-[#111] tracking-[-0.02em] leading-[1.1]">
+              Enter OTP
+            </h1>
+          </div>
+
+          {error && (
+            <div className="flex items-center gap-2.5 bg-[#fff5f5] border border-[#ffd0d0] rounded-lg mb-6 p-3 text-sm text-[#c53030] border-l-[3px] border-l-[#e53e3e]">
+              <svg viewBox="0 0 24 24" strokeWidth="1.8" className="w-[15px] h-[15px] stroke-current fill-none flex-shrink-0">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="flex items-center gap-2.5 bg-[#f0fdf4] border border-[#86efac] rounded-lg mb-6 p-3 text-sm text-[#166534] border-l-[3px] border-l-[#22c55e]">
+              <svg viewBox="0 0 24 24" strokeWidth="1.8" className="w-[15px] h-[15px] stroke-current fill-none flex-shrink-0">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {success}
+            </div>
+          )}
+
+          <form onSubmit={handleVerify}>
+            <div className="mb-6">
+              <label className="block text-[11px] font-medium tracking-[0.14em] uppercase mb-2.5 text-[#555]" htmlFor="otp">
+                Verification Code
+              </label>
+              <input
+                id="otp"
+                type="text"
+                maxLength="6"
+                className="w-full px-4 py-3.5 font-['DM_Sans'] text-base font-normal text-[#111] bg-white border border-[#e0ddd9] rounded-lg outline-none transition-all duration-200 placeholder:text-[#bbb] focus:border-[#111] focus:shadow-[0_0_0_3px_rgba(17,17,17,0.05)] text-center tracking-[0.5em] text-2xl"
+                placeholder="000000"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 px-6 bg-[#111111] text-white border-none rounded-lg font-['DM_Sans'] text-sm font-medium tracking-[0.12em] uppercase cursor-pointer transition-all duration-200 mt-2 hover:bg-[#2a2a2a] hover:shadow-[0_6px_20px_rgba(0,0,0,0.18)] active:scale-[0.99] disabled:opacity-50"
+            >
+              {loading ? "Verifying..." : "Verify & Continue"}
+            </button>
+          </form>
+
+          <div className="mt-9 text-sm text-[#888] text-center">
+            Didn't receive the code?{" "}
+            {countdown > 0 ? (
+              <span className="text-[#666]">Resend in {countdown}s</span>
+            ) : (
+              <button
+                onClick={handleResend}
+                disabled={resending}
+                className="text-[#111] font-medium border-b border-[#111]/25 hover:border-[#111] transition-colors duration-200 bg-transparent cursor-pointer disabled:opacity-50"
+              >
+                {resending ? "Sending..." : "Resend OTP"}
+              </button>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
