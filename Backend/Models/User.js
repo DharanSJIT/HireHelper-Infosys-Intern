@@ -32,28 +32,36 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+
+      validate: {
+        validator: function (value) {
+          return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/.test(
+            value,
+          );
+        },
+
+        message:
+          "Password must contain uppercase, lowercase, number, and special character",
+      },
     },
 
     profilePicture: {
       type: String,
-      default: "",
-    },
-
-    profilePicture: {
-      type: String,
-      default: null
+      default: null,
     },
 
     isVerified: {
       type: Boolean,
       default: false,
     },
+
     otp: String,
+
     otpExpiry: Date,
   },
   { timestamps: true },
 );
+
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
-module.exports = mongoose.model("User", userSchema);
