@@ -168,6 +168,9 @@ exports.resetPassword = async (req, res) => {
     if (user.otp !== otp || user.otpExpiry < Date.now())
       return res.status(400).json({ message: "Invalid or expired OTP" });
 
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+
     if (!passwordRegex.test(newPassword)) {
       return res.status(400).json({
         message:
