@@ -71,6 +71,35 @@ export default function Signup() {
   const labelCls = "text-sm font-semibold text-[#1a1a1a] mb-1.5 block";
 
   return (
+  <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center px-4 py-10">
+
+    <div className="bg-white border border-blue-100 rounded-2xl shadow-[0_8px_30px_rgba(59,130,246,0.12)] w-full max-w-[480px] px-10 py-10 flex flex-col items-center">
+
+
+      {/* Logo */}
+      <div className="w-[68px] h-[68px] bg-gradient-to-br from-blue-600 to-indigo-600 rounded-[18px] flex items-center justify-center mb-5 flex-shrink-0 shadow-lg">
+        <svg viewBox="0 0 24 24" className="w-8 h-8 fill-white">
+          <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+        </svg>
+      </div>
+
+
+      {/* Heading */}
+      <h1 className="text-[26px] font-bold text-gray-900 tracking-tight mb-1 text-center">
+        Create Account
+      </h1>
+
+      <p className="text-sm text-gray-600 text-center mb-7">
+        Join Hire-a-Helper community
+      </p>
+
+
+
+      {/* Error */}
+      {error && (
+        <div className="w-full flex items-center gap-2.5 bg-red-50 border border-red-200 border-l-[3px] border-l-red-500 rounded-lg px-3.5 py-2.5 mb-5 text-[13.5px] text-red-700">
+          {error}
+
     <div className="min-h-screen bg-[#d4f0e0] flex items-center justify-center px-4 py-10">
 
       <div className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] w-full max-w-[480px] px-10 py-10 flex flex-col items-center">
@@ -139,10 +168,22 @@ export default function Signup() {
 
           {/* Email */}
           <div>
-            <label htmlFor="email" className={labelCls}>
+
+
+            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
+              First Name
+     <label htmlFor="email" className={labelCls}>
               Email address
+
             </label>
             <input
+
+              type="text"
+              placeholder="First name"
+              value={firstName}
+              onChange={(e)=>setFirstName(e.target.value)}
+              className="w-full px-3.5 py-[11px] text-sm text-gray-900 bg-white border border-blue-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
+
               id="email"
               type="email"
               placeholder="Enter your email"
@@ -150,24 +191,174 @@ export default function Signup() {
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
               className={inputCls}
+
             />
           </div>
 
           {/* Phone Number (Optional) */}
           <div>
+
+
+            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
+              Last Name
+
             <label htmlFor="phoneNumber" className={labelCls}>
               Phone Number{" "}
               <span className="text-[#9aacba] font-normal">(Optional)</span>
+
             </label>
             <input
+
+              type="text"
+              placeholder="Last name"
+              value={lastName}
+              onChange={(e)=>setLastName(e.target.value)}
+              className="w-full px-3.5 py-[11px] text-sm text-gray-900 bg-white border border-blue-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
+
               id="phoneNumber"
               type="tel"
               placeholder="Enter your phone number"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               className={inputCls}
+
             />
           </div>
+
+
+        </div>
+
+
+
+        {/* Email */}
+        <div>
+
+          <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
+            Email address
+          </label>
+
+          <input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e)=>setEmail(e.target.value)}
+            className="w-full px-3.5 py-[11px] text-sm text-gray-900 bg-white border border-blue-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
+          />
+
+        </div>
+
+
+
+        {/* Phone */}
+        <div>
+
+          <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
+            Phone Number
+            <span className="text-gray-400 font-normal"> (Optional)</span>
+          </label>
+
+          <input
+            type="tel"
+            placeholder="Enter your phone number"
+            value={phoneNumber}
+            onChange={(e)=>setPhoneNumber(e.target.value)}
+            className="w-full px-3.5 py-[11px] text-sm text-gray-900 bg-white border border-blue-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
+          />
+
+        </div>
+
+
+
+        {/* Password */}
+        <div>
+
+          <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
+            Password
+          </label>
+
+          <div className="relative">
+
+            <input
+              type={showPassword ? "text":"password"}
+              placeholder="Create password"
+              value={password}
+              onChange={(e)=>setPassword(e.target.value)}
+              className="w-full px-3.5 py-[11px] text-sm text-gray-900 bg-white border border-blue-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition pr-11"
+            />
+
+            <button
+              type="button"
+              onClick={()=>setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 transition"
+            >
+              <EyeIcon visible={showPassword}/>
+            </button>
+
+          </div>
+
+        </div>
+
+
+
+        {/* Confirm */}
+        <div>
+
+          <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
+            Confirm Password
+          </label>
+
+          <div className="relative">
+
+            <input
+              type={showConfirmPassword ? "text":"password"}
+              placeholder="Confirm password"
+              value={confirmPassword}
+              onChange={(e)=>setConfirmPassword(e.target.value)}
+              className="w-full px-3.5 py-[11px] text-sm text-gray-900 bg-white border border-blue-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition pr-11"
+            />
+
+            <button
+              type="button"
+              onClick={()=>setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 transition"
+            >
+              <EyeIcon visible={showConfirmPassword}/>
+            </button>
+
+          </div>
+
+        </div>
+
+
+
+        {/* Button */}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full py-[13px] mt-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-[15px] font-semibold rounded-lg transition shadow-lg hover:shadow-xl disabled:opacity-50"
+        >
+          {loading ? "Creating account…" : "Create Account"}
+        </button>
+
+
+      </form>
+
+
+
+      {/* Footer */}
+      <p className="mt-6 text-sm text-gray-600 text-center">
+
+        Already have an account?
+
+        <Link
+          to="/login"
+          className="text-blue-600 font-semibold ml-2 hover:text-blue-700 hover:underline transition"
+        >
+          Sign in
+        </Link>
+
+      </p>
+
 
           {/* Password */}
           <div>

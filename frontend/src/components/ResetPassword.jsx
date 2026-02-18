@@ -56,14 +56,38 @@ export default function ResetPassword() {
 
   /* ── Shared classes ── */
   const inputCls =
+
+    "w-full px-3.5 py-[11px] text-sm text-[#1a1a1a] bg-white border border-blue-200 rounded-lg outline-none transition-all placeholder:text-gray-400 focus:border-blue-600 focus:ring-[3px] focus:ring-black/10";
+
+  const labelCls =
+    "text-sm font-semibold text-gray-900 mb-1.5 block";
+
+
     "w-full px-3.5 py-[11px] text-sm text-[#1a1a1a] bg-white border border-[#e2e8f0] rounded-lg outline-none transition-all duration-200 placeholder:text-[#b0bec5] focus:border-[#2f80ed] focus:ring-[3px] focus:ring-[#2f80ed]/10";
+
 
   const labelCls = "text-sm font-semibold text-[#1a1a1a] mb-1.5 block";
 
   return (
     <div className="min-h-screen bg-[#e8f0fe] flex items-center justify-center px-4 py-10">
 
+
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 font-['DM_Sans'] flex items-center justify-center px-4 py-10">
+
+      {/* Card */}
+
+      <div className="bg-white border border-blue-200 rounded-xl shadow-sm w-full max-w-[480px] px-10 py-10 flex flex-col items-center">
+
+        {/* Logo */}
+
+        <div className="w-[60px] h-[60px] bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center mb-6">
+
+          <span className="text-white text-xl font-semibold">
+            H
+          </span>
+
       <div className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] w-full max-w-[480px] px-10 py-10 flex flex-col items-center">
+
 
         {/* ── Logo ── */}
         <div className="w-[68px] h-[68px] bg-[#2f80ed] rounded-[18px] flex items-center justify-center mb-6 flex-shrink-0">
@@ -72,15 +96,30 @@ export default function ResetPassword() {
           </svg>
         </div>
 
+
+
+
+        {/* Heading */}
+
+        <h1 className="text-[28px] font-semibold text-gray-900 mb-2 text-center">
+
+
         {/* ── Heading ── */}
         <h1 className="text-[26px] font-bold text-[#1a1a1a] tracking-tight mb-1.5 text-center leading-tight">
+
           Reset Password
         </h1>
         <p className="text-sm text-[#7a8a99] text-center mb-1 leading-relaxed max-w-[320px]">
           Enter the OTP sent to your email and choose a new password.
         </p>
         {email && (
+
+
+          <p className="text-sm font-medium text-gray-900 mb-6">
+
+
           <p className="text-sm font-semibold text-[#2f80ed] text-center mb-7">
+
             {email}
           </p>
         )}
@@ -88,12 +127,18 @@ export default function ResetPassword() {
 
         {/* ── Error Banner ── */}
         {error && (
+
+
+          <div className="w-full bg-[#f9f8f7] border border-blue-200 text-sm text-red-600 rounded-md px-3 py-2 mb-4">
+
+
           <div className="w-full flex items-center gap-2.5 bg-[#fff5f5] border border-red-200 border-l-[3px] border-l-red-500 rounded-lg px-3.5 py-2.5 mb-5 text-[13.5px] text-red-700">
             <svg viewBox="0 0 24 24" strokeWidth="1.8" className="w-[15px] h-[15px] stroke-red-600 fill-none flex-shrink-0">
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
+
             {error}
           </div>
         )}
@@ -179,7 +224,11 @@ export default function ResetPassword() {
           <button
             type="submit"
             disabled={loading}
+
+            className="w-full py-3 mt-2 bg-gradient-to-br from-blue-600 to-indigo-600 hover:bg-gray-800 text-white font-medium rounded-lg border border-blue-600 transition-all"
+
             className="w-full py-[13px] mt-1 bg-[#2f80ed] hover:bg-[#1a6fd4] hover:shadow-[0_4px_14px_rgba(47,128,237,0.35)] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed text-white text-[15px] font-semibold rounded-lg border-none cursor-pointer transition-all duration-200"
+
           >
             {loading ? "Resetting…" : "Reset Password"}
           </button>
@@ -196,7 +245,11 @@ export default function ResetPassword() {
         {/* ── Back to login button ── */}
         <Link
           to="/login"
+
+          className="w-full text-center py-3 border border-blue-200 rounded-lg text-sm font-medium text-gray-900 hover:bg-[#f9f8f7] transition-all"
+
           className="w-full flex items-center justify-center gap-2 py-[11px] border border-[#e2e8f0] rounded-lg text-sm font-semibold text-[#4a5568] no-underline hover:bg-[#f8fafc] hover:border-[#c8d6e3] transition-all duration-200"
+
         >
           <svg viewBox="0 0 24 24" strokeWidth="2" className="w-4 h-4 stroke-current fill-none">
             <path d="M19 12H5M12 5l-7 7 7 7" />
