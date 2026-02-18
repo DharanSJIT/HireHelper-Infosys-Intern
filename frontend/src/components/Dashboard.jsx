@@ -23,7 +23,7 @@ export default function Dashboard() {
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       {/* Sidebar */}
-      <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:static inset-y-0 left-0 z-50 w-64 bg-gradient-to-br from-blue-600 to-indigo-600 transition-transform duration-300`}>
+      <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 fixed md:static inset-y-0 left-0 z-50 w-64 bg-gradient-to-br from-blue-500 to-indigo-500 transition-transform duration-300`}>
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="p-6 border-b border-white/10">
@@ -33,7 +33,7 @@ export default function Dashboard() {
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                 </svg>
               </div>
-              <span className="font-medium text-sm tracking-[0.12em] uppercase text-white/90">HireHelper</span>
+              <span className="font-medium text-sm tracking-[0.12em] uppercase text-white">HireHelper</span>
             </div>
           </div>
 
@@ -45,8 +45,8 @@ export default function Dashboard() {
                 to={item.path}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                   location.pathname === item.path
-                    ? 'bg-white/10 text-white'
-                    : 'text-white/60 hover:bg-white/5 hover:text-white/90'
+                    ? 'bg-white/20 text-white'
+                    : 'text-white/80 hover:bg-white/10 hover:text-white'
                 }`}
               >
                 <svg viewBox="0 0 24 24" strokeWidth="1.5" className="w-5 h-5 stroke-current fill-none">
@@ -61,7 +61,7 @@ export default function Dashboard() {
           <div className="p-4 border-t border-white/10">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-white/60 hover:bg-white/5 hover:text-white/90 transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors"
             >
               <svg viewBox="0 0 24 24" strokeWidth="1.5" className="w-5 h-5 stroke-current fill-none">
                 <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
