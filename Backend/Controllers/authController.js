@@ -168,6 +168,13 @@ exports.resetPassword = async (req, res) => {
     if (user.otp !== otp || user.otpExpiry < Date.now())
       return res.status(400).json({ message: "Invalid or expired OTP" });
 
+    if (!passwordRegex.test(newPassword)) {
+      return res.status(400).json({
+        message:
+          "Password must contain uppercase, lowercase, number, special character and minimum 8 characters",
+      });
+    }
+
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     user.password = hashedPassword;
