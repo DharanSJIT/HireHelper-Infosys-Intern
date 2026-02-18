@@ -56,13 +56,13 @@ export default function VerifyOtp() {
   };
 
   return (
-  <div className="min-h-screen bg-[#F7F5F2] flex items-center justify-center px-4 py-10">
+  <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center px-4 py-10">
 
     <div className="bg-white border border-gray-200 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] w-full max-w-[480px] px-10 py-10 flex flex-col items-center">
 
 
       {/* Logo */}
-      <div className="w-[68px] h-[68px] bg-black rounded-[18px] flex items-center justify-center mb-6 flex-shrink-0">
+      <div className="w-[68px] h-[68px] bg-gradient-to-br from-blue-600 to-indigo-600 rounded-[18px] flex items-center justify-center mb-6 flex-shrink-0">
         <svg viewBox="0 0 24 24" className="w-8 h-8 fill-white">
           <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
         </svg>
@@ -70,7 +70,7 @@ export default function VerifyOtp() {
 
 
       {/* Heading */}
-      <h1 className="text-[26px] font-bold text-black mb-1.5 text-center">
+      <h1 className="text-[26px] font-bold text-gray-900 mb-1.5 text-center">
         Verify Your Email
       </h1>
 
@@ -110,7 +110,7 @@ export default function VerifyOtp() {
 
         <div>
 
-          <label className="text-sm font-semibold text-black">
+          <label className="text-sm font-semibold text-gray-900">
             Verification Code
           </label>
 
@@ -121,7 +121,7 @@ export default function VerifyOtp() {
             placeholder="000000"
             value={otp}
             onChange={(e)=>setOtp(e.target.value.replace(/\D/g,""))}
-            className="w-full mt-1 px-3.5 py-[11px] text-2xl font-semibold text-black bg-white border border-gray-300 rounded-lg outline-none focus:border-black text-center tracking-[0.5em]"
+            className="w-full mt-1 px-3.5 py-[11px] text-2xl font-semibold text-gray-900 bg-white border border-gray-300 rounded-lg outline-none focus:border-blue-600 text-center tracking-[0.5em]"
           />
 
         </div>
@@ -132,7 +132,7 @@ export default function VerifyOtp() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-[13px] bg-black hover:bg-gray-800 text-white text-[15px] font-semibold rounded-lg transition"
+          className="w-full py-[13px] bg-gradient-to-br from-blue-600 to-indigo-600 hover:bg-gray-800 text-white text-[15px] font-semibold rounded-lg transition"
         >
           {loading ? "Verifying…" : "Verify Code"}
         </button>
@@ -159,7 +159,7 @@ export default function VerifyOtp() {
             type="button"
             onClick={handleResend}
             disabled={resending}
-            className="text-black font-semibold hover:underline"
+            className="text-gray-900 font-semibold hover:underline"
           >
             {resending ? "Sending…" : "Resend"}
           </button>

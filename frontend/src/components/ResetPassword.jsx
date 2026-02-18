@@ -90,24 +90,24 @@ export default function ResetPassword() {
   /* Theme Classes */
 
   const inputCls =
-    "w-full px-3.5 py-[11px] text-sm text-[#1a1a1a] bg-white border border-[#e0ddd9] rounded-lg outline-none transition-all placeholder:text-gray-400 focus:border-black focus:ring-[3px] focus:ring-black/10";
+    "w-full px-3.5 py-[11px] text-sm text-[#1a1a1a] bg-white border border-blue-200 rounded-lg outline-none transition-all placeholder:text-gray-400 focus:border-blue-600 focus:ring-[3px] focus:ring-black/10";
 
   const labelCls =
-    "text-sm font-semibold text-black mb-1.5 block";
+    "text-sm font-semibold text-gray-900 mb-1.5 block";
 
 
 
   return (
 
-    <div className="min-h-screen bg-[#F7F5F2] font-['DM_Sans'] flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 font-['DM_Sans'] flex items-center justify-center px-4 py-10">
 
       {/* Card */}
 
-      <div className="bg-white border border-[#e0ddd9] rounded-xl shadow-sm w-full max-w-[480px] px-10 py-10 flex flex-col items-center">
+      <div className="bg-white border border-blue-200 rounded-xl shadow-sm w-full max-w-[480px] px-10 py-10 flex flex-col items-center">
 
         {/* Logo */}
 
-        <div className="w-[60px] h-[60px] bg-black rounded-lg flex items-center justify-center mb-6">
+        <div className="w-[60px] h-[60px] bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center mb-6">
 
           <span className="text-white text-xl font-semibold">
             H
@@ -119,7 +119,7 @@ export default function ResetPassword() {
 
         {/* Heading */}
 
-        <h1 className="text-[28px] font-semibold text-black mb-2 text-center">
+        <h1 className="text-[28px] font-semibold text-gray-900 mb-2 text-center">
 
           Reset Password
 
@@ -137,7 +137,7 @@ export default function ResetPassword() {
 
         {email && (
 
-          <p className="text-sm font-medium text-black mb-6">
+          <p className="text-sm font-medium text-gray-900 mb-6">
 
             {email}
 
@@ -151,7 +151,7 @@ export default function ResetPassword() {
 
         {error && (
 
-          <div className="w-full bg-[#f9f8f7] border border-[#e0ddd9] text-sm text-red-600 rounded-md px-3 py-2 mb-4">
+          <div className="w-full bg-[#f9f8f7] border border-blue-200 text-sm text-red-600 rounded-md px-3 py-2 mb-4">
 
             {error}
 
@@ -309,7 +309,7 @@ export default function ResetPassword() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 mt-2 bg-black hover:bg-gray-800 text-white font-medium rounded-lg border border-black transition-all"
+            className="w-full py-3 mt-2 bg-gradient-to-br from-blue-600 to-indigo-600 hover:bg-gray-800 text-white font-medium rounded-lg border border-blue-600 transition-all"
           >
 
             {loading
@@ -344,7 +344,7 @@ export default function ResetPassword() {
 
         <Link
           to="/login"
-          className="w-full text-center py-3 border border-[#e0ddd9] rounded-lg text-sm font-medium text-black hover:bg-[#f9f8f7] transition-all"
+          className="w-full text-center py-3 border border-blue-200 rounded-lg text-sm font-medium text-gray-900 hover:bg-[#f9f8f7] transition-all"
         >
 
           Back to Sign In

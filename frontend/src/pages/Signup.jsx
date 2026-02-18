@@ -71,13 +71,13 @@ export default function Signup() {
   const labelCls = "text-sm font-semibold text-[#1a1a1a] mb-1.5 block";
 
   return (
-  <div className="min-h-screen bg-[#F7F5F2] flex items-center justify-center px-4 py-10">
+  <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center px-4 py-10">
 
-    <div className="bg-white border border-gray-200 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] w-full max-w-[480px] px-10 py-10 flex flex-col items-center">
+    <div className="bg-white border border-blue-100 rounded-2xl shadow-[0_8px_30px_rgba(59,130,246,0.12)] w-full max-w-[480px] px-10 py-10 flex flex-col items-center">
 
 
       {/* Logo */}
-      <div className="w-[68px] h-[68px] bg-black rounded-[18px] flex items-center justify-center mb-5 flex-shrink-0">
+      <div className="w-[68px] h-[68px] bg-gradient-to-br from-blue-600 to-indigo-600 rounded-[18px] flex items-center justify-center mb-5 flex-shrink-0 shadow-lg">
         <svg viewBox="0 0 24 24" className="w-8 h-8 fill-white">
           <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
         </svg>
@@ -85,11 +85,11 @@ export default function Signup() {
 
 
       {/* Heading */}
-      <h1 className="text-[26px] font-bold text-black tracking-tight mb-1 text-center">
+      <h1 className="text-[26px] font-bold text-gray-900 tracking-tight mb-1 text-center">
         Create Account
       </h1>
 
-      <p className="text-sm text-gray-500 text-center mb-7">
+      <p className="text-sm text-gray-600 text-center mb-7">
         Join Hire-a-Helper community
       </p>
 
@@ -113,7 +113,7 @@ export default function Signup() {
 
           <div>
 
-            <label className="text-sm font-semibold text-black mb-1.5 block">
+            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
               First Name
             </label>
 
@@ -122,7 +122,7 @@ export default function Signup() {
               placeholder="First name"
               value={firstName}
               onChange={(e)=>setFirstName(e.target.value)}
-              className="w-full px-3.5 py-[11px] text-sm text-black bg-white border border-gray-300 rounded-lg focus:border-black focus:ring-0 outline-none"
+              className="w-full px-3.5 py-[11px] text-sm text-gray-900 bg-white border border-blue-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
             />
 
           </div>
@@ -130,7 +130,7 @@ export default function Signup() {
 
           <div>
 
-            <label className="text-sm font-semibold text-black mb-1.5 block">
+            <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
               Last Name
             </label>
 
@@ -139,7 +139,7 @@ export default function Signup() {
               placeholder="Last name"
               value={lastName}
               onChange={(e)=>setLastName(e.target.value)}
-              className="w-full px-3.5 py-[11px] text-sm text-black bg-white border border-gray-300 rounded-lg focus:border-black focus:ring-0 outline-none"
+              className="w-full px-3.5 py-[11px] text-sm text-gray-900 bg-white border border-blue-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
             />
 
           </div>
@@ -151,7 +151,7 @@ export default function Signup() {
         {/* Email */}
         <div>
 
-          <label className="text-sm font-semibold text-black mb-1.5 block">
+          <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
             Email address
           </label>
 
@@ -160,7 +160,7 @@ export default function Signup() {
             placeholder="Enter your email"
             value={email}
             onChange={(e)=>setEmail(e.target.value)}
-            className="w-full px-3.5 py-[11px] text-sm text-black bg-white border border-gray-300 rounded-lg focus:border-black outline-none"
+            className="w-full px-3.5 py-[11px] text-sm text-gray-900 bg-white border border-blue-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
           />
 
         </div>
@@ -170,7 +170,7 @@ export default function Signup() {
         {/* Phone */}
         <div>
 
-          <label className="text-sm font-semibold text-black mb-1.5 block">
+          <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
             Phone Number
             <span className="text-gray-400 font-normal"> (Optional)</span>
           </label>
@@ -180,7 +180,7 @@ export default function Signup() {
             placeholder="Enter your phone number"
             value={phoneNumber}
             onChange={(e)=>setPhoneNumber(e.target.value)}
-            className="w-full px-3.5 py-[11px] text-sm text-black bg-white border border-gray-300 rounded-lg focus:border-black outline-none"
+            className="w-full px-3.5 py-[11px] text-sm text-gray-900 bg-white border border-blue-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition"
           />
 
         </div>
@@ -190,7 +190,7 @@ export default function Signup() {
         {/* Password */}
         <div>
 
-          <label className="text-sm font-semibold text-black mb-1.5 block">
+          <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
             Password
           </label>
 
@@ -201,13 +201,13 @@ export default function Signup() {
               placeholder="Create password"
               value={password}
               onChange={(e)=>setPassword(e.target.value)}
-              className="w-full px-3.5 py-[11px] text-sm text-black bg-white border border-gray-300 rounded-lg focus:border-black outline-none pr-11"
+              className="w-full px-3.5 py-[11px] text-sm text-gray-900 bg-white border border-blue-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition pr-11"
             />
 
             <button
               type="button"
               onClick={()=>setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 transition"
             >
               <EyeIcon visible={showPassword}/>
             </button>
@@ -221,7 +221,7 @@ export default function Signup() {
         {/* Confirm */}
         <div>
 
-          <label className="text-sm font-semibold text-black mb-1.5 block">
+          <label className="text-sm font-semibold text-gray-700 mb-1.5 block">
             Confirm Password
           </label>
 
@@ -232,13 +232,13 @@ export default function Signup() {
               placeholder="Confirm password"
               value={confirmPassword}
               onChange={(e)=>setConfirmPassword(e.target.value)}
-              className="w-full px-3.5 py-[11px] text-sm text-black bg-white border border-gray-300 rounded-lg focus:border-black outline-none pr-11"
+              className="w-full px-3.5 py-[11px] text-sm text-gray-900 bg-white border border-blue-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition pr-11"
             />
 
             <button
               type="button"
               onClick={()=>setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-blue-600 transition"
             >
               <EyeIcon visible={showConfirmPassword}/>
             </button>
@@ -253,7 +253,7 @@ export default function Signup() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-[13px] mt-1 bg-black hover:bg-gray-800 text-white text-[15px] font-semibold rounded-lg transition"
+          className="w-full py-[13px] mt-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-[15px] font-semibold rounded-lg transition shadow-lg hover:shadow-xl disabled:opacity-50"
         >
           {loading ? "Creating account…" : "Create Account"}
         </button>
@@ -264,13 +264,13 @@ export default function Signup() {
 
 
       {/* Footer */}
-      <p className="mt-6 text-sm text-gray-500 text-center">
+      <p className="mt-6 text-sm text-gray-600 text-center">
 
         Already have an account?
 
         <Link
           to="/login"
-          className="text-black font-semibold ml-2 hover:underline"
+          className="text-blue-600 font-semibold ml-2 hover:text-blue-700 hover:underline transition"
         >
           Sign in
         </Link>

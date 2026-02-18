@@ -30,13 +30,13 @@ export default function ForgotPassword() {
   };
 
   return (
-  <div className="min-h-screen bg-[#F7F5F2] flex items-center justify-center px-4 py-10">
+  <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center px-4 py-10">
 
     <div className="bg-white border border-gray-200 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] w-full max-w-[480px] px-10 py-10 flex flex-col items-center">
 
 
       {/* Logo */}
-      <div className="w-[68px] h-[68px] bg-black rounded-[18px] flex items-center justify-center mb-6">
+      <div className="w-[68px] h-[68px] bg-gradient-to-br from-blue-600 to-indigo-600 rounded-[18px] flex items-center justify-center mb-6">
         <svg viewBox="0 0 24 24" className="w-8 h-8 fill-white">
           <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2z"/>
         </svg>
@@ -45,7 +45,7 @@ export default function ForgotPassword() {
 
 
       {/* Heading */}
-      <h1 className="text-[26px] font-bold text-black mb-1.5 text-center">
+      <h1 className="text-[26px] font-bold text-gray-900 mb-1.5 text-center">
         Forgot Password?
       </h1>
 
@@ -79,7 +79,7 @@ export default function ForgotPassword() {
 
         <div>
 
-          <label className="text-sm font-semibold text-black">
+          <label className="text-sm font-semibold text-gray-900">
             Email address
           </label>
 
@@ -88,7 +88,7 @@ export default function ForgotPassword() {
             placeholder="Enter your email"
             value={email}
             onChange={(e)=>setEmail(e.target.value)}
-            className="w-full mt-1 px-3.5 py-[11px] text-sm text-black bg-white border border-gray-300 rounded-lg outline-none focus:border-black"
+            className="w-full mt-1 px-3.5 py-[11px] text-sm text-gray-900 bg-white border border-gray-300 rounded-lg outline-none focus:border-blue-600"
           />
 
         </div>
@@ -99,7 +99,7 @@ export default function ForgotPassword() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-[13px] bg-black hover:bg-gray-800 text-white text-[15px] font-semibold rounded-lg transition"
+          className="w-full py-[13px] bg-gradient-to-br from-blue-600 to-indigo-600 hover:bg-gray-800 text-white text-[15px] font-semibold rounded-lg transition"
         >
           {loading ? "Sending OTP…" : "Send OTP"}
         </button>
@@ -121,7 +121,7 @@ export default function ForgotPassword() {
       {/* Back */}
       <Link
         to="/login"
-        className="w-full flex items-center justify-center gap-2 py-[11px] border border-gray-300 rounded-lg text-sm font-semibold text-black hover:bg-gray-50 transition"
+        className="w-full flex items-center justify-center gap-2 py-[11px] border border-gray-300 rounded-lg text-sm font-semibold text-gray-900 hover:bg-gray-50 transition"
       >
         Back to Sign In
       </Link>
@@ -135,7 +135,7 @@ export default function ForgotPassword() {
 
         <Link
           to="/signup"
-          className="text-black font-semibold hover:underline"
+          className="text-gray-900 font-semibold hover:underline"
         >
           Sign up
         </Link>

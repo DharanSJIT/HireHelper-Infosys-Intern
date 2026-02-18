@@ -85,9 +85,9 @@ export default function Settings() {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-xl shadow-sm border border-[#e0ddd9] p-8">
+        <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-8">
           <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#111]"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3b82f6]"></div>
           </div>
         </div>
       </div>
@@ -97,7 +97,7 @@ export default function Settings() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Profile Header Card */}
-      <div className="bg-gradient-to-br from-[#111] to-[#2a2a2a] rounded-xl shadow-lg p-8 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-br from-[#3b82f6] to-[#2a2a2a] rounded-xl shadow-lg p-8 text-white relative overflow-hidden">
         <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full border border-white/10"></div>
         <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full border border-white/10"></div>
         
@@ -114,7 +114,7 @@ export default function Settings() {
                 {user?.first_name?.[0]}{user?.last_name?.[0]}
               </div>
             )}
-            <label className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+            <label className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-600/50 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
               <input
                 type="file"
                 accept="image/*"
@@ -156,9 +156,9 @@ export default function Settings() {
       </div>
 
       {/* Profile Information Card */}
-      <div className="bg-white rounded-xl shadow-sm border border-[#e0ddd9] overflow-hidden">
-        <div className="border-b border-[#e0ddd9] px-8 py-5">
-          <h3 className="text-lg font-semibold text-[#111] tracking-tight">Profile Information</h3>
+      <div className="bg-white rounded-xl shadow-sm border border-blue-100 overflow-hidden">
+        <div className="border-b border-blue-100 px-8 py-5">
+          <h3 className="text-lg font-semibold text-gray-900 tracking-tight">Profile Information</h3>
           <p className="text-sm text-[#666] mt-1">Your personal details and account information</p>
         </div>
         
@@ -173,7 +173,7 @@ export default function Settings() {
                   type="text"
                   value={user?.first_name || ''}
                   readOnly
-                  className="w-full px-4 py-3.5 font-['DM_Sans'] text-base text-[#111] bg-[#F7F5F2] border border-[#e0ddd9] rounded-lg outline-none cursor-not-allowed"
+                  className="w-full px-4 py-3.5 font-['DM_Sans'] text-base text-gray-900 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-lg outline-none cursor-not-allowed"
                 />
                 <svg viewBox="0 0 24 24" strokeWidth="1.5" className="w-5 h-5 stroke-[#999] fill-none absolute right-4 top-1/2 -translate-y-1/2">
                   <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -190,7 +190,7 @@ export default function Settings() {
                   type="text"
                   value={user?.last_name || ''}
                   readOnly
-                  className="w-full px-4 py-3.5 font-['DM_Sans'] text-base text-[#111] bg-[#F7F5F2] border border-[#e0ddd9] rounded-lg outline-none cursor-not-allowed"
+                  className="w-full px-4 py-3.5 font-['DM_Sans'] text-base text-gray-900 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-lg outline-none cursor-not-allowed"
                 />
                 <svg viewBox="0 0 24 24" strokeWidth="1.5" className="w-5 h-5 stroke-[#999] fill-none absolute right-4 top-1/2 -translate-y-1/2">
                   <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -207,7 +207,7 @@ export default function Settings() {
                   type="email"
                   value={user?.email_id || ''}
                   readOnly
-                  className="w-full px-4 py-3.5 font-['DM_Sans'] text-base text-[#111] bg-[#F7F5F2] border border-[#e0ddd9] rounded-lg outline-none cursor-not-allowed"
+                  className="w-full px-4 py-3.5 font-['DM_Sans'] text-base text-gray-900 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-lg outline-none cursor-not-allowed"
                 />
                 <svg viewBox="0 0 24 24" strokeWidth="1.5" className="w-5 h-5 stroke-[#999] fill-none absolute right-4 top-1/2 -translate-y-1/2">
                   <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -220,7 +220,7 @@ export default function Settings() {
 
       {/* Account Stats Card */}
       <div className="grid md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl shadow-sm border border-[#e0ddd9] p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-6">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
               <svg viewBox="0 0 24 24" strokeWidth="1.5" className="w-6 h-6 stroke-blue-600 fill-none">
@@ -228,13 +228,13 @@ export default function Settings() {
               </svg>
             </div>
             <div>
-              <p className="text-2xl font-semibold text-[#111]">0</p>
+              <p className="text-2xl font-semibold text-gray-900">0</p>
               <p className="text-sm text-[#666]">Tasks Posted</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-[#e0ddd9] p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-6">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
               <svg viewBox="0 0 24 24" strokeWidth="1.5" className="w-6 h-6 stroke-green-600 fill-none">
@@ -242,13 +242,13 @@ export default function Settings() {
               </svg>
             </div>
             <div>
-              <p className="text-2xl font-semibold text-[#111]">0</p>
+              <p className="text-2xl font-semibold text-gray-900">0</p>
               <p className="text-sm text-[#666]">Completed</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border border-[#e0ddd9] p-6">
+        <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-6">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
               <svg viewBox="0 0 24 24" strokeWidth="1.5" className="w-6 h-6 stroke-purple-600 fill-none">
@@ -256,7 +256,7 @@ export default function Settings() {
               </svg>
             </div>
             <div>
-              <p className="text-2xl font-semibold text-[#111]">0</p>
+              <p className="text-2xl font-semibold text-gray-900">0</p>
               <p className="text-sm text-[#666]">Requests</p>
             </div>
           </div>
