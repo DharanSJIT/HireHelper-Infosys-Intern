@@ -131,8 +131,8 @@ export default function Dashboard() {
         <div className="px-3 py-4 border-t border-blue-600/60">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
-                       text-blue-100 hover:bg-red-500/20 hover:text-red-200
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-red-500 justify-center 
+                       text-blue-100 hover:bg-red-600 hover:text-red-200
                        transition-colors duration-150 cursor-pointer"
           >
             <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.75" className="w-[18px] h-[18px] stroke-current">
