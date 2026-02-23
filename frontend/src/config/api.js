@@ -33,9 +33,23 @@ TaskAPI.interceptors.request.use((config) => {
   return config;
 });
 
-export const createTask = (data) => TaskAPI.post('/', data);
+export const createTask = (data) => TaskAPI.post('/create', data);
 export const getMyTasks = () => TaskAPI.get('/my-tasks');
 export const getFeedTasks = () => TaskAPI.get('/feed');
 export const getTaskById = (id) => TaskAPI.get(`/${id}`);
+
+const RequestAPI = axios.create({
+  baseURL: 'http://localhost:3000/api/requests',
+});
+
+RequestAPI.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export const requestTask = (taskId) => RequestAPI.post(`/${taskId}`);
 
 export default API;
