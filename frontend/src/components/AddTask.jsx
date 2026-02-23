@@ -91,7 +91,7 @@ export default function AddTask() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-5">
+    <div className="max-w-6xl mx-auto space-y-5">
 
       {/* Page Header */}
       <div className="surface-card p-5 md:p-6">
