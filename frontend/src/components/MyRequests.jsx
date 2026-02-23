@@ -12,7 +12,7 @@ export default function MyRequests() {
       <section className="surface-card p-5 md:p-6">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="rounded-lg border border-blue-100 p-4">
-            <p className="text-xs text-slate-500">Total Requests</p>
+            <p className="text-xs text-slate-600">Total Requests</p>
             <p className="text-2xl font-semibold text-slate-900">0</p>
           </div>
           <div className="rounded-lg border border-amber-200 p-4">
