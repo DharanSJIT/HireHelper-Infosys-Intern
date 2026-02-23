@@ -9,8 +9,6 @@ const requestRoutes = require("./routes/requestRoutes.js");
 
 const app = express();
 
-connectDB();
-
 app.use(cors());
 app.use(express.urlencoded({extended:true, limit: '10mb'}));
 app.use(express.json({limit: '10mb'}));
@@ -24,6 +22,12 @@ app.get("/api/dashboard",authMiddleware,(req,res)=>{
 });
 
 const PORT = process.env.PORT;
-app.listen(PORT,()=>{
-    console.log(`Server running on port ${PORT}`);
-});
+
+const startServer = async () => {
+    await connectDB();
+    app.listen(PORT,()=>{
+        console.log(`Server running on port ${PORT}`);
+    });
+};
+
+startServer();
