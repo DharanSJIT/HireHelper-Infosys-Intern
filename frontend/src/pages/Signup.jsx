@@ -2,6 +2,27 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { register } from '../config/api';
 
+function EyeIcon({ open }) {
+  return open ? (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.75" className="w-4 h-4 stroke-current">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+    </svg>
+  ) : (
+    <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.75" className="w-4 h-4 stroke-current">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+    </svg>
+  );
+}
+
+const passwordRules = [
+  { id: 'len',   label: 'At least 8 characters',      test: (p) => p.length >= 8 },
+  { id: 'upper', label: 'One uppercase letter',        test: (p) => /[A-Z]/.test(p) },
+  { id: 'lower', label: 'One lowercase letter',        test: (p) => /[a-z]/.test(p) },
+  { id: 'num',   label: 'One number',                  test: (p) => /[0-9]/.test(p) },
+  { id: 'sym',   label: 'One special character',       test: (p) => /[!@#$%^&*(),.?":{}|<>]/.test(p) },
+];
+
 export default function Signup() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -24,47 +45,23 @@ export default function Signup() {
       return;
     }
 
+    const failedRule = passwordRules.find((r) => !r.test(password));
+    if (failedRule) {
+      setError(`Password: ${failedRule.label.toLowerCase()}`);
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
     }
 
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters.');
-      return;
-    }
-
-    if (!/[A-Z]/.test(password)) {
-      setError('Password must contain at least one uppercase letter.');
-      return;
-    }
-
-    if (!/[a-z]/.test(password)) {
-      setError('Password must contain at least one lowercase letter.');
-      return;
-    }
-
-    if (!/[0-9]/.test(password)) {
-      setError('Password must contain at least one number.');
-      return;
-    }
-
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      setError('Password must contain at least one special character.');
-      return;
-    }
-
     setLoading(true);
     try {
-      await register({
-        first_name: firstName,
-        last_name: lastName,
-        email_id: email,
-        password,
-      });
+      await register({ first_name: firstName, last_name: lastName, email_id: email, password });
       navigate('/verify-otp', { state: { email } });
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -72,64 +69,183 @@ export default function Signup() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-10">
-      <div className="bg-white border border-blue-100 rounded-2xl w-full max-w-[500px] px-8 py-9">
-        <div className="w-14 h-14 bg-blue-600 rounded-xl flex items-center justify-center mb-5 mx-auto">
-          <svg viewBox="0 0 24 24" className="w-7 h-7 fill-white">
-            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-          </svg>
+      <div className="w-full max-w-[500px]">
+
+        {/* Brand */}
+        <div className="text-center mb-8">
+          <div className="inline-flex w-12 h-12 bg-blue-600 rounded-xl items-center justify-center mb-4">
+            <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" className="w-6 h-6 stroke-white">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Create your account</h1>
+          <p className="text-sm text-slate-500 mt-1">Join the HireHelper platform for free</p>
         </div>
 
-        <h1 className="text-2xl font-semibold text-slate-900 text-center">Create Account</h1>
-        <p className="text-sm text-slate-600 text-center mt-1 mb-6">Join HireHelper platform</p>
+        {/* Card */}
+        <div className="surface-card px-7 py-8">
 
-        {error && <div className="w-full bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4 text-sm text-red-700">{error}</div>}
-
-        <form onSubmit={handleSignup} className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-medium text-slate-700 mb-1 block">First Name</label>
-              <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First name" className="w-full px-3 py-2.5 text-sm border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500" />
+          {/* Error */}
+          {error && (
+            <div className="alert-error mb-5">
+              <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.75" className="w-4 h-4 stroke-red-600 flex-shrink-0 mt-0.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              </svg>
+              {error}
             </div>
-            <div>
-              <label className="text-sm font-medium text-slate-700 mb-1 block">Last Name</label>
-              <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last name" className="w-full px-3 py-2.5 text-sm border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500" />
+          )}
+
+          <form onSubmit={handleSignup} className="space-y-4">
+
+            {/* Name Row */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="input-group">
+                <label htmlFor="signup-first" className="input-label">First Name *</label>
+                <input
+                  id="signup-first"
+                  type="text"
+                  autoComplete="given-name"
+                  placeholder="First"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="input-field"
+                />
+              </div>
+              <div className="input-group">
+                <label htmlFor="signup-last" className="input-label">Last Name *</label>
+                <input
+                  id="signup-last"
+                  type="text"
+                  autoComplete="family-name"
+                  placeholder="Last"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="input-field"
+                />
+              </div>
             </div>
-          </div>
 
-          <div>
-            <label className="text-sm font-medium text-slate-700 mb-1 block">Email address</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter your email" className="w-full px-3 py-2.5 text-sm border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500" />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-slate-700 mb-1 block">Phone Number <span className="text-slate-400">(Optional)</span></label>
-            <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="Enter your phone number" className="w-full px-3 py-2.5 text-sm border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500" />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-slate-700 mb-1 block">Password</label>
-            <div className="relative">
-              <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Create password" className="w-full px-3 py-2.5 text-sm border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 pr-12" />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-500 hover:text-blue-600">{showPassword ? 'Hide' : 'Show'}</button>
+            {/* Email */}
+            <div className="input-group">
+              <label htmlFor="signup-email" className="input-label">Email Address *</label>
+              <input
+                id="signup-email"
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="input-field"
+              />
             </div>
-          </div>
 
-          <div>
-            <label className="text-sm font-medium text-slate-700 mb-1 block">Confirm Password</label>
-            <div className="relative">
-              <input type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm password" className="w-full px-3 py-2.5 text-sm border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 pr-12" />
-              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-500 hover:text-blue-600">{showConfirmPassword ? 'Hide' : 'Show'}</button>
+            {/* Phone */}
+            <div className="input-group">
+              <label htmlFor="signup-phone" className="input-label">
+                Phone Number
+                <span className="normal-case font-normal text-slate-400 ml-1">(optional)</span>
+              </label>
+              <input
+                id="signup-phone"
+                type="tel"
+                autoComplete="tel"
+                placeholder="+1 (555) 000-0000"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                className="input-field"
+              />
             </div>
-          </div>
 
-          <button type="submit" disabled={loading} className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg disabled:opacity-50">
-            {loading ? 'Creating account...' : 'Create Account'}
-          </button>
-        </form>
+            {/* Password */}
+            <div className="input-group">
+              <label htmlFor="signup-password" className="input-label">Password *</label>
+              <div className="relative">
+                <input
+                  id="signup-password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  placeholder="Create a password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="input-field pr-11"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer transition-colors duration-150"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  <EyeIcon open={showPassword} />
+                </button>
+              </div>
 
-        <p className="mt-6 text-sm text-slate-600 text-center">
-          Already have an account? <Link to="/login" className="text-blue-600 font-medium hover:text-blue-700">Sign in</Link>
+              {/* Password strength checklist */}
+              {password.length > 0 && (
+                <div className="mt-2 grid grid-cols-2 gap-1">
+                  {passwordRules.map((rule) => {
+                    const passed = rule.test(password);
+                    return (
+                      <div key={rule.id} className="flex items-center gap-1.5">
+                        <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${passed ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                        <span className={`text-[11px] ${passed ? 'text-emerald-700' : 'text-slate-500'}`}>{rule.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Confirm Password */}
+            <div className="input-group">
+              <label htmlFor="signup-confirm" className="input-label">Confirm Password *</label>
+              <div className="relative">
+                <input
+                  id="signup-confirm"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  placeholder="Repeat your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="input-field pr-11"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer transition-colors duration-150"
+                  aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                >
+                  <EyeIcon open={showConfirmPassword} />
+                </button>
+              </div>
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full py-2.5 mt-1"
+            >
+              {loading ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Creating account...
+                </>
+              ) : 'Create Account'}
+            </button>
+          </form>
+        </div>
+
+        {/* Sign In Link */}
+        <p className="mt-5 text-center text-sm text-slate-500">
+          Already have an account?{' '}
+          <Link to="/login" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-150">
+            Sign in
+          </Link>
         </p>
+
       </div>
     </div>
   );
