@@ -79,10 +79,10 @@ export default function Dashboard() {
 
       {/* ── Sidebar ────────────────────────────────────────────── */}
       <aside
-        className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0
-          fixed md:static inset-y-0 left-0 z-50 w-64 flex-shrink-0
+        className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          fixed inset-y-0 left-0 z-50 w-64 flex-shrink-0
           bg-blue-700 flex flex-col
-          transition-transform duration-200 ease-out`}
+          transition-transform duration-300 ease-in-out`}
         style={{ boxShadow: '2px 0 16px 0 rgba(29,78,216,0.12)' }}
       >
         {/* Logo */}
@@ -153,7 +153,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="md:hidden p-2 rounded-lg hover:bg-slate-100 text-slate-600 cursor-pointer transition-colors duration-150"
+                className="p-2 rounded-lg hover:bg-slate-100 text-slate-600 cursor-pointer transition-colors duration-150"
                 aria-label="Toggle menu"
               >
                 <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" className="w-5 h-5 stroke-current">
@@ -204,7 +204,7 @@ export default function Dashboard() {
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/40 z-40 md:hidden backdrop-blur-[1px]"
+          className="fixed inset-0 bg-slate-900/40 z-40 backdrop-blur-[1px]"
           onClick={() => setSidebarOpen(false)}
         />
       )}

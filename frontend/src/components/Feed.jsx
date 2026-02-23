@@ -84,7 +84,7 @@ export default function Feed() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-5">
+    <div className="max-w-6xl mx-auto space-y-5">
 
       {/* Page Header */}
       <div className="surface-card p-5 md:p-6 flex items-center justify-between gap-4">
