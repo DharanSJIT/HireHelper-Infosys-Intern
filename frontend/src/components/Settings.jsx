@@ -1,20 +1,47 @@
 import React, { useEffect, useState } from 'react';
 import { getProfile, updateProfilePicture } from '../config/api';
+import { 
+  Camera, 
+  User, 
+  Mail, 
+  Phone, 
+  ShieldCheck, 
+  CheckCircle2, 
+  Loader2,
+  Activity,
+  ListTodo,
+  CheckSquare,
+  Send,
+  UserCircle2,
+  AlertCircle
+} from 'lucide-react';
 
-function StatCard({ value, label, colorClass = 'text-slate-900' }) {
+function StatCard({ icon, value, label, iconColorClass = 'text-blue-500', bgClass = 'bg-blue-50' }) {
   return (
-    <div className="stat-card flex flex-col gap-1">
-      <p className={`stat-value ${colorClass}`}>{value}</p>
-      <p className="stat-label">{label}</p>
+    <div className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col items-start gap-4 shadow-sm hover:shadow-md transition-shadow duration-200 group">
+      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${bgClass} ${iconColorClass} shadow-sm group-hover:scale-105 transition-transform duration-300`}>
+        {icon}
+      </div>
+      <div>
+        <p className="text-3xl font-bold tracking-tight text-slate-900">{value}</p>
+        <p className="text-[13px] font-bold uppercase tracking-wider text-slate-500 mt-1">{label}</p>
+      </div>
     </div>
   );
 }
 
-function InfoRow({ label, value }) {
+function InfoRow({ icon, label, value }) {
   return (
-    <div className="data-row">
-      <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{label}</p>
-      <p className="text-sm font-medium text-slate-900">{value || '—'}</p>
+    <div className="flex items-start md:items-center justify-between py-4 border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors px-2 rounded-lg">
+      <div className="flex items-center gap-3">
+        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
+          {icon}
+        </div>
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
+          <p className="text-[15px] font-semibold text-slate-800 mt-0.5">{value || 'Not provided'}</p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -80,63 +107,62 @@ export default function Settings() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto space-y-5">
-        <div className="surface-card p-6 flex items-center gap-5">
-          <div className="skeleton w-20 h-20 rounded-xl" />
-          <div className="flex-1 space-y-2">
-            <div className="skeleton h-5 w-1/3" />
-            <div className="skeleton h-3 w-1/4" />
-            <div className="skeleton h-7 w-32 rounded-lg mt-1" />
+      <div className="max-w-4xl mx-auto space-y-6 pb-12">
+        <div className="bg-white rounded-2xl border border-slate-200 p-8 flex items-center gap-6 shadow-sm">
+          <div className="skeleton w-24 h-24 rounded-2xl" />
+          <div className="flex-1 space-y-3">
+            <div className="skeleton h-6 w-1/3 rounded-md" />
+            <div className="skeleton h-4 w-1/4 rounded-sm" />
+            <div className="skeleton h-8 w-32 rounded-lg mt-4" />
           </div>
         </div>
-        <div className="surface-card p-6 space-y-3">
-          <div className="skeleton h-4 w-1/5" />
-          <div className="skeleton h-3 w-full" />
-          <div className="skeleton h-3 w-4/5" />
+        <div className="bg-white rounded-2xl border border-slate-200 p-8 space-y-4 shadow-sm">
+          <div className="skeleton h-5 w-1/4 rounded-md mb-6" />
+          <div className="skeleton h-12 w-full rounded-lg" />
+          <div className="skeleton h-12 w-full rounded-lg" />
+          <div className="skeleton h-12 w-full rounded-lg" />
         </div>
       </div>
     );
   }
 
-  const initials = `${user?.first_name?.[0] || ''}${user?.last_name?.[0] || ''}`;
+  const initials = `${user?.first_name?.[0] || ''}${user?.last_name?.[0] || ''}`.toUpperCase();
 
   return (
-    <div className="max-w-4xl mx-auto space-y-5">
+    <div className="max-w-4xl mx-auto space-y-8 pb-12">
 
       {/* ── Page Header ──────────────────────────────────────── */}
-      <div className="surface-card p-5 md:p-6">
-        <h2 className="page-title">Account Settings</h2>
-        <p className="text-sm text-slate-500 mt-0.5">Manage your profile, photo, and account details.</p>
+      <div>
+        <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Account Settings</h2>
+        <p className="text-[15px] text-slate-500 mt-1 max-w-xl leading-relaxed">Manage your personal profile, update your photo, and view your activity summary.</p>
       </div>
 
       {/* ── Profile Identity ─────────────────────────────────── */}
-      <div className="surface-card p-5 md:p-6">
-        <p className="section-label mb-4">Profile</p>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+      <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-sm">
+        <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-6">Profile Card</h3>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 md:gap-8 bg-slate-50/50 rounded-2xl p-6 border border-slate-100 shadow-inner">
 
           {/* Avatar */}
-          <div className="relative flex-shrink-0">
+          <div className="relative flex-shrink-0 group cursor-pointer">
             {user?.profilePicture ? (
               <img
                 src={user.profilePicture}
                 alt="Profile"
-                className="w-20 h-20 rounded-xl object-cover border border-slate-200"
+                className="w-28 h-28 rounded-2xl object-cover border-4 border-white shadow-md group-hover:shadow-lg transition-transform duration-300 group-hover:scale-[1.02]"
               />
             ) : (
-              <div className="w-20 h-20 bg-blue-600 rounded-xl flex items-center justify-center text-white text-xl font-bold tracking-wide">
-                {initials || 'U'}
+              <div className="w-28 h-28 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-3xl font-black tracking-wide border-4 border-white shadow-md group-hover:shadow-lg transition-transform duration-300 group-hover:scale-[1.02]">
+                {initials || <UserCircle2 className="w-12 h-12 text-white/80" />}
               </div>
             )}
+            
             {/* Upload Overlay */}
             <label
               htmlFor="avatar-upload"
-              className="absolute -bottom-2 -right-2 w-7 h-7 bg-white border border-slate-300 rounded-lg flex items-center justify-center cursor-pointer hover:bg-slate-50 hover:border-slate-400 transition-colors duration-150"
+              className="absolute -bottom-2 -right-2 w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center cursor-pointer shadow-md hover:bg-slate-50 hover:border-blue-400 hover:text-blue-600 transition-all duration-200 z-10"
               title="Change photo"
             >
-              <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.75" className="w-3.5 h-3.5 stroke-slate-600">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
-              </svg>
+              <Camera className="w-5 h-5 text-slate-500 hover:text-blue-600 transition-colors" />
               <input
                 id="avatar-upload"
                 type="file"
@@ -150,32 +176,41 @@ export default function Settings() {
 
           {/* Info */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-bold text-slate-900">
+            <h3 className="text-2xl font-black text-slate-900 tracking-tight">
               {user?.first_name} {user?.last_name}
             </h3>
-            <p className="text-sm text-slate-500 mt-0.5">{user?.email_id}</p>
+            <p className="text-[15px] font-medium text-slate-500 mt-1">{user?.email_id}</p>
 
-            <div className="flex items-center flex-wrap gap-2 mt-3">
+            <div className="flex items-center flex-wrap gap-3 mt-4">
               {/* Verification badge */}
-              <span className={`badge ${user?.isVerified ? 'badge-green' : 'badge-amber'}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${user?.isVerified ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-                {user?.isVerified ? 'Verified Account' : 'Pending Verification'}
-              </span>
+              <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold uppercase tracking-wide shadow-sm
+                ${user?.isVerified 
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-emerald-100' 
+                  : 'bg-amber-50 text-amber-700 border-amber-200 shadow-amber-100'}`}>
+                {user?.isVerified ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-amber-600" />
+                )}
+                {user?.isVerified ? 'Verified Account' : 'Action Required'}
+              </div>
 
               {/* Upload button */}
               <label
                 htmlFor="avatar-upload-2"
-                className="btn-secondary text-xs px-3 py-1.5 cursor-pointer"
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm font-bold shadow-sm cursor-pointer hover:bg-slate-50 hover:border-slate-400 hover:text-slate-900 transition-all duration-200"
               >
                 {uploading ? (
-                  <span className="flex items-center gap-1.5">
-                    <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
                     Uploading...
-                  </span>
-                ) : 'Change Photo'}
+                  </>
+                ) : (
+                  <>
+                    <Camera className="w-4 h-4 text-slate-500" />
+                    Change Photo
+                  </>
+                )}
                 <input
                   id="avatar-upload-2"
                   type="file"
@@ -190,31 +225,65 @@ export default function Settings() {
         </div>
       </div>
 
-      {/* ── Profile Information ───────────────────────────────── */}
-      <div className="surface-card overflow-hidden">
-        <div className="px-5 md:px-6 py-4 border-b border-slate-200 flex items-center gap-2">
-          <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.75" className="w-4 h-4 stroke-slate-500">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-          </svg>
-          <h3 className="text-sm font-bold text-slate-900">Profile Information</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* ── Profile Information ───────────────────────────────── */}
+        <div className="lg:col-span-12">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="px-6 md:px-8 py-5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 shadow-inner">
+                <User className="w-4 h-4" />
+              </div>
+              <h3 className="text-[15px] font-bold text-slate-900 tracking-tight">Personal Information</h3>
+            </div>
+
+            <div className="p-4 md:p-6 lg:p-8 bg-white grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
+              <InfoRow icon={<User className="w-4 h-4" />} label="First Name" value={user?.first_name} />
+              <InfoRow icon={<User className="w-4 h-4" />} label="Last Name" value={user?.last_name} />
+              <InfoRow icon={<Mail className="w-4 h-4" />} label="Email Address" value={user?.email_id} />
+              <InfoRow icon={<Phone className="w-4 h-4" />} label="Phone Number" value={user?.phone_number} />
+              <div className="md:col-span-2">
+                <InfoRow 
+                  icon={<ShieldCheck className={`w-4 h-4 ${user?.isVerified ? 'text-emerald-500' : 'text-amber-500'}`} />} 
+                  label="Account Status" 
+                  value={user?.isVerified ? 'Verified' : 'Pending Verification'} 
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="px-5 md:px-6 py-2">
-          <InfoRow label="First Name" value={user?.first_name} />
-          <InfoRow label="Last Name" value={user?.last_name} />
-          <InfoRow label="Email Address" value={user?.email_id} />
-          {user?.phone_number && <InfoRow label="Phone Number" value={user.phone_number} />}
-          <InfoRow label="Account Status" value={user?.isVerified ? 'Verified' : 'Pending Verification'} />
-        </div>
-      </div>
-
-      {/* ── Activity Summary ─────────────────────────────────── */}
-      <div>
-        <p className="section-label px-1 mb-3">Activity Summary</p>
-        <div className="grid grid-cols-3 gap-3">
-          <StatCard value="0" label="Tasks Posted" colorClass="text-blue-700" />
-          <StatCard value="0" label="Completed" colorClass="text-emerald-700" />
-          <StatCard value="0" label="Requests Sent" colorClass="text-amber-700" />
+        {/* ── Activity Summary ─────────────────────────────────── */}
+        <div className="lg:col-span-12">
+          <div className="flex items-center gap-3 mb-5 px-2">
+            <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 shadow-inner">
+              <Activity className="w-4 h-4" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 tracking-tight">Activity Summary</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <StatCard 
+              icon={<ListTodo className="w-6 h-6" />} 
+              value="0" 
+              label="Tasks Posted" 
+              iconColorClass="text-blue-600" 
+              bgClass="bg-blue-50"
+            />
+            <StatCard 
+              icon={<CheckSquare className="w-6 h-6" />} 
+              value="0" 
+              label="Tasks Completed" 
+              iconColorClass="text-emerald-600" 
+              bgClass="bg-emerald-50"
+            />
+            <StatCard 
+              icon={<Send className="w-6 h-6" />} 
+              value="0" 
+              label="Requests Sent" 
+              iconColorClass="text-indigo-600" 
+              bgClass="bg-indigo-50"
+            />
+          </div>
         </div>
       </div>
     </div>
