@@ -74,19 +74,20 @@ export default function Dashboard() {
     [location.pathname],
   );
 
+  const closeSidebar = () => setSidebarOpen(false);
+
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
 
-      {/* ── Sidebar ────────────────────────────────────────────── */}
+      {/* ── Sidebar (slide-in from left, closed by default) ───────── */}
       <aside
-        className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          fixed inset-y-0 left-0 z-50 w-64 flex-shrink-0
-          bg-blue-700 flex flex-col
-          transition-transform duration-300 ease-in-out`}
-        style={{ boxShadow: '2px 0 16px 0 rgba(29,78,216,0.12)' }}
+        className={`fixed inset-y-0 left-0 z-50 w-64 flex-shrink-0 bg-blue-700 flex flex-col
+          transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        style={{ boxShadow: '4px 0 20px 0 rgba(29,78,216,0.18)' }}
       >
-        {/* Logo */}
-        <div className="px-5 py-5 border-b border-blue-600/60">
+        {/* Logo + Close button */}
+        <div className="px-5 py-5 border-b border-blue-600/60 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="sidebar-logo-ring">
               <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" className="w-4 h-4 stroke-white">
@@ -98,6 +99,17 @@ export default function Dashboard() {
               <p className="text-blue-200 text-[10px] leading-none mt-0.5">Task Platform</p>
             </div>
           </div>
+
+          {/* Close (×) button */}
+          <button
+            onClick={closeSidebar}
+            className="p-1.5 rounded-lg text-blue-200 hover:bg-blue-600/50 hover:text-white transition-colors duration-150 cursor-pointer"
+            aria-label="Close menu"
+          >
+            <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" className="w-4 h-4 stroke-current">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
 
         {/* Nav */}
@@ -109,7 +121,7 @@ export default function Dashboard() {
               <Link
                 key={item.path}
                 to={item.path}
-                onClick={() => setSidebarOpen(false)}
+                onClick={closeSidebar}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-all duration-150 ${
                   isActive
                     ? 'bg-white text-blue-700 font-semibold'
@@ -131,9 +143,8 @@ export default function Dashboard() {
         <div className="px-3 py-4 border-t border-blue-600/60">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-red-500 justify-center 
-                       text-blue-100 hover:bg-red-600 hover:text-red-200
-                       transition-colors duration-150 cursor-pointer"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium bg-red-500 justify-center
+                       text-white hover:bg-red-600 transition-colors duration-150 cursor-pointer"
           >
             <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.75" className="w-[18px] h-[18px] stroke-current">
               <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -143,18 +154,27 @@ export default function Dashboard() {
         </div>
       </aside>
 
-      {/* ── Main Area ──────────────────────────────────────────── */}
+      {/* Backdrop overlay — visible only when sidebar is open */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-slate-900/40 z-40 backdrop-blur-[1px]"
+          onClick={closeSidebar}
+        />
+      )}
+
+      {/* ── Main Area ──────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
 
         {/* Topbar */}
         <header className="bg-white border-b border-slate-200 flex-shrink-0" style={{ boxShadow: 'var(--shadow-xs)' }}>
           <div className="flex items-center justify-between px-5 md:px-6 h-[60px]">
+
             {/* Left: hamburger + breadcrumb */}
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
+                onClick={() => setSidebarOpen(true)}
                 className="p-2 rounded-lg hover:bg-slate-100 text-slate-600 cursor-pointer transition-colors duration-150"
-                aria-label="Toggle menu"
+                aria-label="Open menu"
               >
                 <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" className="w-5 h-5 stroke-current">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
@@ -200,14 +220,6 @@ export default function Dashboard() {
           <Outlet />
         </main>
       </div>
-
-      {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-slate-900/40 z-40 backdrop-blur-[1px]"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
     </div>
   );
 }

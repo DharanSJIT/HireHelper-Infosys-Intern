@@ -20,10 +20,10 @@ export default function ForgotPassword() {
     setLoading(true);
     try {
       await forgotPassword({ email_id: email });
-      setSuccess('OTP sent to your email.');
+      setSuccess('OTP sent! Redirecting…');
       setTimeout(() => navigate('/reset-password', { state: { email } }), 1500);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to send OTP');
+      setError(err.response?.data?.message || 'Failed to send OTP. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -31,37 +31,79 @@ export default function ForgotPassword() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-10">
-      <div className="bg-white border border-blue-100 rounded-2xl w-full max-w-[460px] px-8 py-9">
-        <div className="w-14 h-14 bg-blue-600 rounded-xl flex items-center justify-center mb-5 mx-auto">
-          <svg viewBox="0 0 24 24" className="w-7 h-7 fill-white">
-            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2z" />
-          </svg>
+      <div className="w-full max-w-[440px]">
+
+        {/* Brand */}
+        <div className="text-center mb-8">
+          <div className="inline-flex w-12 h-12 bg-blue-600 rounded-xl items-center justify-center mb-4">
+            <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" className="w-6 h-6 stroke-white">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Forgot your password?</h1>
+          <p className="text-sm text-slate-500 mt-1">Enter your email and we'll send you a reset code.</p>
         </div>
 
-        <h1 className="text-2xl font-semibold text-slate-900 text-center">Forgot Password?</h1>
-        <p className="text-sm text-slate-600 text-center mt-1 mb-6">Enter your email to receive a reset OTP.</p>
+        {/* Card */}
+        <div className="surface-card px-7 py-8">
 
-        {error && <div className="w-full bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-4 text-sm text-red-700">{error}</div>}
-        {success && <div className="w-full bg-green-50 border border-green-200 rounded-lg px-3 py-2 mb-4 text-sm text-green-700">{success}</div>}
+          {error && (
+            <div className="alert-error mb-5">
+              <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.75" className="w-4 h-4 stroke-red-600 flex-shrink-0 mt-0.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              </svg>
+              {error}
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-sm font-medium text-slate-700">Email address</label>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full mt-1 px-3 py-3 text-sm border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
-            />
-          </div>
+          {success && (
+            <div className="alert-success mb-5">
+              <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.75" className="w-4 h-4 stroke-emerald-600 flex-shrink-0 mt-0.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {success}
+            </div>
+          )}
 
-          <button type="submit" disabled={loading} className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg disabled:opacity-50">
-            {loading ? 'Sending OTP...' : 'Send OTP'}
-          </button>
-        </form>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="input-group">
+              <label htmlFor="forgot-email" className="input-label">Email Address</label>
+              <input
+                id="forgot-email"
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="input-field"
+              />
+            </div>
 
-        <Link to="/login" className="w-full mt-4 block text-center py-3 border border-blue-200 rounded-lg text-sm font-medium text-blue-700 hover:bg-blue-50">Back to Sign In</Link>
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full py-2.5 mt-2"
+            >
+              {loading ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Sending OTP…
+                </>
+              ) : 'Send Reset Code'}
+            </button>
+          </form>
+        </div>
+
+        <p className="mt-5 text-center text-sm text-slate-500">
+          Remember your password?{' '}
+          <Link to="/login" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-150">
+            Back to Sign In
+          </Link>
+        </p>
+
       </div>
     </div>
   );
