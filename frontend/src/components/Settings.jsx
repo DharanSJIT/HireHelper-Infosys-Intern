@@ -18,13 +18,13 @@ import {
 
 function StatCard({ icon, value, label, iconColorClass = 'text-blue-500', bgClass = 'bg-blue-50' }) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col items-start gap-4 shadow-sm hover:shadow-md transition-shadow duration-200 group">
+    <div className="stat-card flex flex-col items-start gap-4 hover:shadow-md transition-shadow duration-200 group">
       <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${bgClass} ${iconColorClass} shadow-sm group-hover:scale-105 transition-transform duration-300`}>
         {icon}
       </div>
       <div>
-        <p className="text-3xl font-bold tracking-tight text-slate-900">{value}</p>
-        <p className="text-[13px] font-bold uppercase tracking-wider text-slate-500 mt-1">{label}</p>
+        <p className="stat-value">{value}</p>
+        <p className="stat-label mt-1">{label}</p>
       </div>
     </div>
   );
@@ -108,7 +108,7 @@ export default function Settings() {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto space-y-6 pb-12">
-        <div className="bg-white rounded-2xl border border-slate-200 p-8 flex items-center gap-6 shadow-sm">
+        <div className="surface-card p-8 flex items-center gap-6">
           <div className="skeleton w-24 h-24 rounded-2xl" />
           <div className="flex-1 space-y-3">
             <div className="skeleton h-6 w-1/3 rounded-md" />
@@ -116,7 +116,7 @@ export default function Settings() {
             <div className="skeleton h-8 w-32 rounded-lg mt-4" />
           </div>
         </div>
-        <div className="bg-white rounded-2xl border border-slate-200 p-8 space-y-4 shadow-sm">
+        <div className="surface-card p-8 space-y-4">
           <div className="skeleton h-5 w-1/4 rounded-md mb-6" />
           <div className="skeleton h-12 w-full rounded-lg" />
           <div className="skeleton h-12 w-full rounded-lg" />
@@ -133,13 +133,13 @@ export default function Settings() {
 
       {/* ── Page Header ──────────────────────────────────────── */}
       <div>
-        <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Account Settings</h2>
-        <p className="text-[15px] text-slate-500 mt-1 max-w-xl leading-relaxed">Manage your personal profile, update your photo, and view your activity summary.</p>
+        <h2 className="section-head">Account Settings</h2>
+        <p className="section-sub mt-1 max-w-xl">Manage your personal profile, update your photo, and view your activity summary.</p>
       </div>
 
       {/* ── Profile Identity ─────────────────────────────────── */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-sm">
-        <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-6">Profile Card</h3>
+      <div className="surface-card p-6 md:p-8">
+        <h3 className="section-label">Profile Card</h3>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 md:gap-8 bg-slate-50/50 rounded-2xl p-6 border border-slate-100 shadow-inner">
 
           {/* Avatar */}
@@ -176,7 +176,7 @@ export default function Settings() {
 
           {/* Info */}
           <div className="flex-1 min-w-0">
-            <h3 className="text-2xl font-black text-slate-900 tracking-tight">
+            <h3 className="page-title text-2xl">
               {user?.first_name} {user?.last_name}
             </h3>
             <p className="text-[15px] font-medium text-slate-500 mt-1">{user?.email_id}</p>
@@ -198,7 +198,7 @@ export default function Settings() {
               {/* Upload button */}
               <label
                 htmlFor="avatar-upload-2"
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm font-bold shadow-sm cursor-pointer hover:bg-slate-50 hover:border-slate-400 hover:text-slate-900 transition-all duration-200"
+                className="btn-secondary px-4 py-1.5 shadow-sm"
               >
                 {uploading ? (
                   <>
@@ -228,7 +228,7 @@ export default function Settings() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* ── Profile Information ───────────────────────────────── */}
         <div className="lg:col-span-12">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="surface-card overflow-hidden">
             <div className="px-6 md:px-8 py-5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 shadow-inner">
                 <User className="w-4 h-4" />
@@ -258,27 +258,27 @@ export default function Settings() {
             <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 shadow-inner">
               <Activity className="w-4 h-4" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 tracking-tight">Activity Summary</h3>
+            <h3 className="page-title">Activity Summary</h3>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <StatCard 
               icon={<ListTodo className="w-6 h-6" />} 
-              value="0" 
+              value={user?.stats?.tasksPosted || 0} 
               label="Tasks Posted" 
               iconColorClass="text-blue-600" 
               bgClass="bg-blue-50"
             />
             <StatCard 
               icon={<CheckSquare className="w-6 h-6" />} 
-              value="0" 
+              value={user?.stats?.tasksCompleted || 0} 
               label="Tasks Completed" 
               iconColorClass="text-emerald-600" 
               bgClass="bg-emerald-50"
             />
             <StatCard 
               icon={<Send className="w-6 h-6" />} 
-              value="0" 
+              value={user?.stats?.requestsSent || 0} 
               label="Requests Sent" 
               iconColorClass="text-indigo-600" 
               bgClass="bg-indigo-50"

@@ -94,11 +94,11 @@ export default function MyTasks() {
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
 
       {/* ─── Page Header + Summary ─────────────────────────────── */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8">
+      <div className="surface-card p-6 md:p-8">
         <div className="flex items-start justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 tracking-tight">My Tasks</h2>
-            <p className="text-sm text-slate-500 mt-1 leading-relaxed">Track, filter, and manage all tasks you have posted on HireHelper.</p>
+            <h2 className="section-head">My Tasks</h2>
+            <p className="section-sub mt-1">Track, filter, and manage all tasks you have posted on HireHelper.</p>
           </div>
           <div className="hidden sm:flex items-center justify-center w-12 h-12 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 shadow-sm">
             <LayoutList className="w-6 h-6" />
@@ -128,7 +128,7 @@ export default function MyTasks() {
       </div>
 
       {/* ─── Filters ───────────────────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+      <div className="surface-card p-4">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
           {/* Search */}
           <div className="md:col-span-6 relative">
@@ -138,7 +138,7 @@ export default function MyTasks() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by title, location, description..."
-              className="w-full rounded-lg border border-slate-300 bg-slate-50/50 pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors shadow-sm hover:border-slate-400"
+              className="input-field pl-10"
             />
           </div>
 
@@ -150,7 +150,7 @@ export default function MyTasks() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-white pl-10 pr-8 py-2.5 text-sm font-medium text-slate-700 cursor-pointer focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors shadow-sm hover:border-slate-400 appearance-none"
+              className="input-field pl-10 cursor-pointer appearance-none"
               style={{ backgroundImage: `url('data:image/svg+xml;utf8,<svg fill="none" viewBox="0 0 24 24" stroke="%2364748B" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>')`, backgroundPosition: 'right 0.75rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1em' }}
             >
               <option value="all">All Statuses</option>
@@ -168,7 +168,7 @@ export default function MyTasks() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-white pl-10 pr-8 py-2.5 text-sm font-medium text-slate-700 cursor-pointer focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors shadow-sm hover:border-slate-400 appearance-none"
+              className="input-field pl-10 cursor-pointer appearance-none"
               style={{ backgroundImage: `url('data:image/svg+xml;utf8,<svg fill="none" viewBox="0 0 24 24" stroke="%2364748B" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>')`, backgroundPosition: 'right 0.75rem center', backgroundRepeat: 'no-repeat', backgroundSize: '1em' }}
             >
               <option value="newest">Newest First</option>
@@ -183,7 +183,7 @@ export default function MyTasks() {
       {loading && (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 border-t border-slate-100 pt-2">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="bg-white rounded-xl border border-slate-200 p-5 space-y-4 shadow-sm">
+            <div key={i} className="surface-card p-5 space-y-4">
               <div className="skeleton h-5 w-3/4 rounded-md" />
               <div className="space-y-2 mt-3">
                 <div className="skeleton h-3.5 w-full rounded-sm" />
@@ -205,7 +205,7 @@ export default function MyTasks() {
 
       {/* ─── Error ─────────────────────────────────────────────── */}
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 text-red-700 shadow-sm mt-2">
+        <div className="alert-error mt-2">
           <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
           <p className="text-sm font-medium leading-relaxed">{error}</p>
         </div>
@@ -213,29 +213,29 @@ export default function MyTasks() {
 
       {/* ─── Empty State (no tasks) ─────────────────────────────── */}
       {!loading && !error && tasks.length === 0 && (
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden mt-6">
-          <div className="empty-state py-20">
-            <div className="w-20 h-20 rounded-full bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center mb-5 text-slate-400">
-              <Inbox className="w-8 h-8" />
+        <div className="surface-card mt-6">
+          <div className="empty-state">
+            <div className="empty-icon">
+              <Inbox className="w-8 h-8 text-slate-400" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 tracking-tight">No tasks posted yet</h3>
-            <p className="text-[15px] text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed">Create your first task and helpers nearby will be able to find and request it.</p>
+            <h3 className="section-head text-lg">No tasks posted yet</h3>
+            <p className="section-sub mt-2 max-w-sm">Create your first task and helpers nearby will be able to find and request it.</p>
           </div>
         </div>
       )}
 
       {/* ─── Empty State (filter mismatch) ─────────────────────── */}
       {!loading && !error && tasks.length > 0 && filteredTasks.length === 0 && (
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden mt-6">
-          <div className="empty-state py-16">
-            <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mb-4 text-slate-400 ring-4 ring-slate-50">
+        <div className="surface-card mt-6">
+          <div className="empty-state">
+            <div className="empty-icon text-slate-400">
               <XCircle className="w-8 h-8" />
             </div>
-            <h3 className="text-base font-bold text-slate-900">No tasks match your filters</h3>
-            <p className="text-[14px] text-slate-500 mt-1 mb-5">Try clearing the search query or adjusting the selected status.</p>
+            <h3 className="section-head text-base">No tasks match your filters</h3>
+            <p className="section-sub mb-5">Try clearing the search query or adjusting the selected status.</p>
             <button
               onClick={() => { setQuery(''); setStatusFilter('all'); }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50 hover:border-slate-400 transition-all shadow-sm"
+              className="btn-secondary"
             >
               Clear All Filters
             </button>
@@ -247,7 +247,7 @@ export default function MyTasks() {
       {!loading && !error && filteredTasks.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredTasks.map((task) => (
-            <article key={task._id} className="bg-white border border-slate-200 rounded-xl overflow-hidden flex flex-col group hover:border-blue-300 hover:shadow-md transition-all duration-300 transform hover:-translate-y-0.5">
+            <article key={task._id} className="surface-card-hover overflow-hidden flex flex-col group">
               {/* Task Image */}
               {task.picture && (
                 <div className="h-40 w-full overflow-hidden border-b border-slate-100 relative">

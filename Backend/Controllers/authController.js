@@ -1,4 +1,6 @@
 const User = require("../Models/User");
+const Task = require("../Models/Task");
+const Request = require("../Models/Request");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { generateOtp } = require("../utils/generateOtp");
@@ -196,11 +198,23 @@ exports.getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select(
       "-password -otp -otpExpiry",
-    );
+    ).lean();
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.json(user);
+
+    const tasksPosted = await Task.countDocuments({ createdBy: req.user.id });
+    const tasksCompleted = await Task.countDocuments({ createdBy: req.user.id, status: "completed" });
+    const requestsSent = await Request.countDocuments({ requestedBy: req.user.id });
+
+    res.json({
+      ...user,
+      stats: {
+        tasksPosted,
+        tasksCompleted,
+        requestsSent
+      }
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
