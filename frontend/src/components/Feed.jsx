@@ -79,8 +79,12 @@ export default function Feed() {
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
 
       {/* Page Header */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 md:p-8 flex items-center justify-between gap-4">
+      <div className="surface-card p-6 md:p-8 flex items-center justify-between gap-4">
         <div>
+
+          <h2 className="section-head">Task Feed</h2>
+          <p className="section-sub mt-1 max-w-lg">Browse open tasks from people in your area. Find something you can help with and send a request!</p>
+
           <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Task Feed</h2>
           <p className="text-sm text-slate-500 mt-1 max-w-lg leading-relaxed">
             Browse open tasks from people in your area. Find something you can help with and send a request!
@@ -99,7 +103,7 @@ export default function Feed() {
       {loading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="bg-white rounded-xl border border-slate-200 p-6 space-y-4 shadow-sm">
+            <div key={i} className="surface-card p-6 space-y-4">
               <div className="flex items-start justify-between">
                 <div className="skeleton h-5 w-2/3 rounded-md" />
                 <div className="skeleton h-5 w-16 rounded-full" />
@@ -117,7 +121,7 @@ export default function Feed() {
 
       {/* Error */}
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 text-red-700 shadow-sm mt-2">
+        <div className="alert-error mt-2">
           <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
           <p className="text-sm font-medium leading-relaxed">{error}</p>
         </div>
@@ -125,6 +129,15 @@ export default function Feed() {
 
       {/* Empty */}
       {!loading && !error && tasks.length === 0 && (
+
+        <div className="surface-card mt-6">
+          <div className="empty-state">
+            <div className="empty-icon text-slate-400">
+              <Rss className="w-8 h-8" />
+            </div>
+            <h3 className="section-head text-lg">No open tasks right now</h3>
+            <p className="section-sub mt-2 max-w-sm mx-auto text-center">New tasks will appear here as soon as someone posts one. Check back soon!</p>
+
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden mt-6">
           <div className="py-20 text-center">
             <Rss className="w-8 h-8 mx-auto text-slate-400 mb-4" />
@@ -149,11 +162,30 @@ export default function Feed() {
               task.status?.toLowerCase() !== 'open';
 
             return (
+
+              <article key={task._id} className="surface-card-hover overflow-hidden flex flex-col group">
+                {/* Task Image */}
+                {task.picture && (
+                  <div className="h-44 w-full overflow-hidden border-b border-slate-100 relative">
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent z-10 pointer-events-none" />
+                    <img
+                      src={task.picture}
+                      alt={task.title}
+                      className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
+                    />
+                  </div>
+                )}
+
               <article key={task._id} className="bg-white border border-slate-200 rounded-2xl overflow-hidden flex flex-col group hover:border-blue-300 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+
 
                 <div className="p-6 flex flex-col flex-1">
 
                   <div className="flex items-start justify-between gap-3 mb-4">
+
+                    <h3 className="text-lg font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-blue-700 transition-colors">{task.title}</h3>
+                    <span className="badge badge-green flex-shrink-0">
+
                     <h3 className="text-lg font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-blue-700 transition-colors">
                       {task.title}
                     </h3>
@@ -162,6 +194,30 @@ export default function Feed() {
                     </span>
                   </div>
 
+                  {/* Description */}
+                  <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 mb-5 shadow-inner">
+                    <p className="text-[14px] text-slate-600 line-clamp-3 leading-relaxed">{task.description}</p>
+                  </div>
+
+                  {/* Meta */}
+                  <div className="space-y-3 mb-6 bg-white p-2 rounded-lg">
+                    <MetaRow icon={<User className="w-4 h-4" />}>
+                      {task.createdBy?.first_name || 'Anonymous'} {task.createdBy?.last_name || ''}
+                    </MetaRow>
+                    <MetaRow icon={<MapPin className="w-4 h-4" />}>
+                      {task.location}
+                    </MetaRow>
+                    <MetaRow icon={<CalendarIcon className="w-4 h-4" />}>
+                      {formatDate(task.startDate)}{task.startTime ? ` · ${task.startTime}` : ''}
+                    </MetaRow>
+                  </div>
+
+                  {/* Category Tag */}
+                  {task.category && (
+                    <div className="mb-5 flex flex-wrap gap-2">
+                      <span className="badge badge-blue">{task.category}</span>
+                    </div>
+                  )}
                   <p className="text-[14px] text-slate-600 mb-5 line-clamp-3">{task.description}</p>
 
                   <div className="mt-auto pt-2 border-t border-slate-100">
@@ -182,6 +238,13 @@ export default function Feed() {
                       type="button"
                       onClick={() => handleRequest(task._id)}
                       disabled={isDisabled}
+
+                      className={
+                        state.success
+                          ? 'btn-secondary w-full text-emerald-700 border-emerald-300 cursor-default opacity-100 hover:bg-emerald-50'
+                          : 'btn-primary w-full'
+                      }
+
                       className={`w-full py-3 rounded-xl text-sm font-bold transition-all duration-200 ${
                         state.success
                           ? 'bg-emerald-50 text-emerald-700 border border-emerald-300'

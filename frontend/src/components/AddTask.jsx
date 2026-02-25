@@ -107,8 +107,8 @@ export default function AddTask() {
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Post a Task</h2>
-          <p className="text-sm text-slate-500 mt-1 max-w-xl leading-relaxed">Describe what you need done, set the schedule, and let helpers nearby reach out to you.</p>
+          <h2 className="section-head">Post a Task</h2>
+          <p className="section-sub mt-1 max-w-xl">Describe what you need done, set the schedule, and let helpers nearby reach out to you.</p>
         </div>
         <div className="flex items-center gap-2 text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 shadow-sm">
           <Info className="w-4 h-4" />
@@ -117,7 +117,7 @@ export default function AddTask() {
       </div>
 
       {/* Form Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="surface-card overflow-hidden">
 
         {/* Status Messages */}
         {(error || success) && (
@@ -156,7 +156,7 @@ export default function AddTask() {
                   onChange={handleChange}
                   placeholder="e.g. Help move a sofa to the 3rd floor"
                   maxLength={120}
-                  className="input-field shadow-sm"
+                  className="input-field"
                 />
                 <div className="flex justify-end mt-1">
                   <p className="text-[11px] text-slate-400 font-medium">{form.title.length}/120</p>
@@ -172,7 +172,7 @@ export default function AddTask() {
                   onChange={handleChange}
                   placeholder="Describe the work in detail — include any important notes, requirements, or tools needed."
                   rows={4}
-                  className="input-field shadow-sm resize-none"
+                  className="input-field resize-none"
                 />
               </div>
 
@@ -199,7 +199,7 @@ export default function AddTask() {
                     name="category"
                     value={form.category}
                     onChange={handleChange}
-                    className="input-field shadow-sm cursor-pointer"
+                    className="input-field cursor-pointer"
                   >
                     {CATEGORIES.map((cat) => (
                       <option key={cat} value={cat}>{cat}</option>
@@ -218,7 +218,7 @@ export default function AddTask() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pl-11">
-              <div className="space-y-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
+              <div className="space-y-4 p-4 surface-card">
                 <p className="text-xs font-bold text-slate-900 border-b border-slate-100 pb-2 mb-3 tracking-wide uppercase">Start Time</p>
                 <div className="input-group">
                   <FieldLabel htmlFor="startDate">Date *</FieldLabel>
@@ -251,7 +251,7 @@ export default function AddTask() {
                 </div>
               </div>
 
-              <div className="space-y-4 p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
+              <div className="space-y-4 p-4 surface-card">
                 <p className="text-xs font-bold text-slate-900 border-b border-slate-100 pb-2 mb-3 tracking-wide uppercase">End Time <span className="text-slate-400 font-normal normal-case ml-1">(Optional)</span></p>
                 <div className="input-group">
                   <FieldLabel htmlFor="endDate" optional>Date</FieldLabel>
@@ -319,7 +319,7 @@ export default function AddTask() {
                   </div>
                 ) : (
                   <div className="max-w-sm">
-                    <div className="w-14 h-14 bg-white rounded-full border border-slate-200 shadow-sm flex items-center justify-center mx-auto mb-4 text-slate-400">
+                    <div className="empty-icon mx-auto text-slate-400">
                       <ImagePlus className="w-6 h-6" />
                     </div>
                     <h4 className="text-sm font-semibold text-slate-900 mb-1">Upload an image</h4>
