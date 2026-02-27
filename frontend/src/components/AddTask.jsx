@@ -102,7 +102,7 @@ export default function AddTask() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-12">
+    <div className="max-w-[65vw] mx-auto space-y-6 pb-12">
 
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">

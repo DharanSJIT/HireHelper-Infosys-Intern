@@ -12,6 +12,7 @@ import Requests from './components/Requests'
 import MyRequests from './components/MyRequests'
 import AddTask from './components/AddTask'
 import Settings from './components/Settings'
+import Notifications from './components/Notifications'
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
@@ -34,6 +35,7 @@ function App() {
           <Route path="my-tasks" element={<MyTasks />} />
           <Route path="requests" element={<Requests />} />
           <Route path="my-requests" element={<MyRequests />} />
+          <Route path="notifications" element={<Notifications />} />
           <Route path="add-task" element={<AddTask />} />
           <Route path="settings" element={<Settings />} />
         </Route>
