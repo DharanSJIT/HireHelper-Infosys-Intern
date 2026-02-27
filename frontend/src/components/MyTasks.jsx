@@ -91,7 +91,7 @@ export default function MyTasks() {
   }, [tasks, query, statusFilter, sortBy]);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 pb-12">
+    <div className="max-w-[80vw] mx-auto space-y-6 pb-12">
 
       {/* ─── Page Header + Summary ─────────────────────────────── */}
       <div className="surface-card p-6 md:p-8">

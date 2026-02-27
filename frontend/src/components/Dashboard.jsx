@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { getNotifications } from '../config/api';
 import { 
   Rss, 
   ListTodo, 
@@ -11,7 +12,8 @@ import {
   X,
   ChevronRight,
   LogOut,
-  Hexagon
+  Hexagon,
+  Bell
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -49,8 +51,24 @@ const NAV_ITEMS = [
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    loadNotifications();
+    const interval = setInterval(loadNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const loadNotifications = async () => {
+    try {
+      const { data } = await getNotifications();
+      setUnreadCount(data?.unreadCount || 0);
+    } catch (err) {
+      // Silent fail
+    }
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -171,7 +189,7 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Right: CTA + avatar */}
+            {/* Right: CTA + notifications + avatar */}
             <div className="flex items-center gap-4">
               <Link
                 to="/dashboard/add-task"
@@ -179,6 +197,20 @@ export default function Dashboard() {
               >
                 <PlusCircle className="w-4 h-4" />
                 Post Task
+              </Link>
+              
+              {/* Notification Bell */}
+              <Link
+                to="/dashboard/notifications"
+                className="relative p-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors"
+                title="Notifications"
+              >
+                <Bell className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
               </Link>
               
               {/* Profile avatar link to settings */}

@@ -51,5 +51,12 @@ RequestAPI.interceptors.request.use((config) => {
 });
 
 export const requestTask = (taskId) => RequestAPI.post(`/${taskId}`);
+export const getRequestsForMyTasks = () => RequestAPI.get('/my-tasks');
+export const getMyRequests = () => RequestAPI.get('/my-requests');
+export const acceptRequest = (requestId) => RequestAPI.patch(`/${requestId}/accept`);
+export const rejectRequest = (requestId) => RequestAPI.patch(`/${requestId}/reject`);
+export const getNotifications = () => RequestAPI.get('/notifications');
+export const markNotificationRead = (notificationId) => RequestAPI.patch(`/notifications/${notificationId}/read`);
+export const markAllNotificationsRead = () => RequestAPI.patch('/notifications/read-all');
 
 export default API;
