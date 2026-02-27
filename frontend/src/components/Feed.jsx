@@ -1,15 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { getFeedTasks, requestTask } from '../config/api';
-import { 
-  MapPin, 
-  Calendar as CalendarIcon, 
-  User, 
-  AlertCircle, 
-  Inbox, 
-  Loader2, 
-  CheckCircle2, 
+import {
+  MapPin,
+  Calendar as CalendarIcon,
+  User,
+  AlertCircle,
+  Loader2,
+  CheckCircle2,
   Rss,
-  Clock
 } from 'lucide-react';
 
 function formatDate(dateValue) {
@@ -77,16 +75,11 @@ export default function Feed() {
 
   return (
     <div className="max-w-[80vw] mx-auto space-y-6 pb-12">
-
       {/* Page Header */}
       <div className="surface-card p-6 md:p-8 flex items-center justify-between gap-4">
         <div>
-
           <h2 className="section-head">Task Feed</h2>
-          <p className="section-sub mt-1 max-w-lg">Browse open tasks from people in your area. Find something you can help with and send a request!</p>
-
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Task Feed</h2>
-          <p className="text-sm text-slate-500 mt-1 max-w-lg leading-relaxed">
+          <p className="section-sub mt-1 max-w-lg">
             Browse open tasks from people in your area. Find something you can help with and send a request!
           </p>
         </div>
@@ -129,21 +122,14 @@ export default function Feed() {
 
       {/* Empty */}
       {!loading && !error && tasks.length === 0 && (
-
         <div className="surface-card mt-6">
           <div className="empty-state">
             <div className="empty-icon text-slate-400">
               <Rss className="w-8 h-8" />
             </div>
             <h3 className="section-head text-lg">No open tasks right now</h3>
-            <p className="section-sub mt-2 max-w-sm mx-auto text-center">New tasks will appear here as soon as someone posts one. Check back soon!</p>
-
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden mt-6">
-          <div className="py-20 text-center">
-            <Rss className="w-8 h-8 mx-auto text-slate-400 mb-4" />
-            <h3 className="text-lg font-bold text-slate-900">No open tasks right now</h3>
-            <p className="text-[15px] text-slate-500 mt-2 max-w-sm mx-auto">
-              New tasks will appear here as soon as someone posts one.
+            <p className="section-sub mt-2 max-w-sm mx-auto text-center">
+              New tasks will appear here as soon as someone posts one. Check back soon!
             </p>
           </div>
         </div>
@@ -162,7 +148,6 @@ export default function Feed() {
               task.status?.toLowerCase() !== 'open';
 
             return (
-
               <article key={task._id} className="surface-card-hover overflow-hidden flex flex-col group">
                 {/* Task Image */}
                 {task.picture && (
@@ -176,16 +161,8 @@ export default function Feed() {
                   </div>
                 )}
 
-              <article key={task._id} className="bg-white border border-slate-200 rounded-2xl overflow-hidden flex flex-col group hover:border-blue-300 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-
-
                 <div className="p-6 flex flex-col flex-1">
-
                   <div className="flex items-start justify-between gap-3 mb-4">
-
-                    <h3 className="text-lg font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-blue-700 transition-colors">{task.title}</h3>
-                    <span className="badge badge-green flex-shrink-0">
-
                     <h3 className="text-lg font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-blue-700 transition-colors">
                       {task.title}
                     </h3>
@@ -218,10 +195,8 @@ export default function Feed() {
                       <span className="badge badge-blue">{task.category}</span>
                     </div>
                   )}
-                  <p className="text-[14px] text-slate-600 mb-5 line-clamp-3">{task.description}</p>
 
                   <div className="mt-auto pt-2 border-t border-slate-100">
-
                     {state.error && (
                       <div className="mb-3 text-red-600 text-xs font-semibold">
                         {state.error}
@@ -238,13 +213,6 @@ export default function Feed() {
                       type="button"
                       onClick={() => handleRequest(task._id)}
                       disabled={isDisabled}
-
-                      className={
-                        state.success
-                          ? 'btn-secondary w-full text-emerald-700 border-emerald-300 cursor-default opacity-100 hover:bg-emerald-50'
-                          : 'btn-primary w-full'
-                      }
-
                       className={`w-full py-3 rounded-xl text-sm font-bold transition-all duration-200 ${
                         state.success
                           ? 'bg-emerald-50 text-emerald-700 border border-emerald-300'
@@ -269,7 +237,6 @@ export default function Feed() {
                         'Send Request to Help'
                       )}
                     </button>
-
                   </div>
                 </div>
               </article>
