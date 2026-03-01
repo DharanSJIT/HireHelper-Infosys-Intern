@@ -15,6 +15,13 @@ exports.createTask = async (req, res) => {
       picture,
     } = req.body;
 
+    if (!title || !description || !category || !location) {
+      return res.status(400).json({
+        success: false,
+        message: "All required fields must be provided",
+      });
+    }
+    
     let imageUrl = "";
 
     if (picture) {
@@ -96,10 +103,10 @@ exports.getTaskById = async (req, res) => {
     if (!task) {
       return res.status(404).json({
         success: false,
-        message: "Task not found"
+        message: "Task not found",
       });
     }
-    
+
     res.json({
       success: true,
       task,
