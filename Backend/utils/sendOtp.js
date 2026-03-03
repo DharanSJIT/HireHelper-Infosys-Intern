@@ -1,14 +1,19 @@
 const nodemailer = require("nodemailer");
-
+ 
 exports.sendOtp = async (email, otp) => {
   const transporter = nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 587,          // ✅ Use 587
+    secure: false,      // ✅ Must be false for 587
     auth: {
       user: process.env.EMAIL,
       pass: process.env.EMAIL_PASS
+    },
+    tls: {
+      rejectUnauthorized: false   // ✅ Fix SSL issue (dev only)
     }
   });
-
+ 
   await transporter.sendMail({
     from: process.env.EMAIL,
     to: email,
@@ -16,3 +21,4 @@ exports.sendOtp = async (email, otp) => {
     text: `Your OTP is ${otp}`
   });
 };
+ 
