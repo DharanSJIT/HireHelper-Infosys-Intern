@@ -12,8 +12,24 @@ exports.register = async (req, res) => {
     const { first_name, last_name, email_id, password } = req.body;
     const existingUser = await User.findOne({ email_id });
 
-    if (existingUser && existingUser.isVerified) {
-      return res.status(400).json({ message: "User already exists" });
+    if (existingUser) {
+      if (existingUser.isVerified) {
+        return res.status(400).json({
+          success: false,
+          message: "User already exists",
+        });
+      } else {
+        const otp = generateOtp();
+        existingUser.otp = otp;
+        existingUser.otpExpiry = Date.now() + 5 * 60 * 1000;
+        await existingUser.save();
+        await sendOtp(email_id, otp);
+
+        return res.status(200).json({
+          success: true,
+          message: "OTP resent. Please verify your account.",
+        });
+      }
     }
 
     const passwordRegex =
@@ -62,9 +78,13 @@ exports.verifyOtp = async (req, res) => {
 
     await user.save();
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = jwt.sign(
+      { id: user._id, email: user.email_id },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      },
+    );
 
     res.json({ message: "Account verified successfully", token });
   } catch (error) {
@@ -82,10 +102,13 @@ exports.login = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if (!user.isVerified)
-      return res
-        .status(400)
-        .json({ message: "Please verify your email first" });
+    if (!user.isVerified) {
+      return res.status(403).json({
+        success: false,
+        message: "Email not verified",
+        email: user.email,
+      });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
@@ -196,24 +219,29 @@ exports.resetPassword = async (req, res) => {
 
 exports.getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select(
-      "-password -otp -otpExpiry",
-    ).lean();
+    const user = await User.findById(req.user.id)
+      .select("-password -otp -otpExpiry")
+      .lean();
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
     const tasksPosted = await Task.countDocuments({ createdBy: req.user.id });
-    const tasksCompleted = await Task.countDocuments({ createdBy: req.user.id, status: "completed" });
-    const requestsSent = await Request.countDocuments({ requestedBy: req.user.id });
+    const tasksCompleted = await Task.countDocuments({
+      createdBy: req.user.id,
+      status: "completed",
+    });
+    const requestsSent = await Request.countDocuments({
+      requestedBy: req.user.id,
+    });
 
     res.json({
       ...user,
       stats: {
         tasksPosted,
         tasksCompleted,
-        requestsSent
-      }
+        requestsSent,
+      },
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
