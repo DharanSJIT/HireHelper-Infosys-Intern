@@ -50,7 +50,7 @@ const NAV_ITEMS = [
 ];
 
 export default function Dashboard() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
@@ -80,51 +80,43 @@ export default function Dashboard() {
     [location.pathname],
   );
 
-  const closeSidebar = () => setSidebarOpen(false);
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
 
-      {/* ── Sidebar (slide-in from left, closed by default) ───────── */}
+      {/* ── Sidebar ───────── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 flex-shrink-0 bg-blue-700 flex flex-col
-          transition-transform duration-300 ease-in-out
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
-        style={{ boxShadow: '4px 0 20px 0 rgba(29,78,216,0.18)' }}
+        className={`flex-shrink-0 bg-blue-700 flex flex-col transition-all duration-300 ease-in-out ${
+          sidebarOpen ? 'w-64' : 'w-0'
+        }`}
+        style={{ boxShadow: sidebarOpen ? '4px 0 20px 0 rgba(29,78,216,0.18)' : 'none' }}
       >
-        {/* Logo + Close button */}
-        <div className="px-5 py-5 border-b border-blue-600/60 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="sidebar-logo-ring bg-blue-600/50">
-              <Hexagon className="w-4 h-4 text-white" fill="currentColor" />
-            </div>
-            <div>
-              <p className="text-white font-bold text-sm leading-none">HireHelper</p>
-              <p className="text-blue-200 text-[10px] leading-none mt-0.5 tracking-wider uppercase">Platform</p>
-            </div>
+        {/* Logo */}
+        <div className={`px-5 py-5 border-b border-blue-600/60 flex items-center gap-3 overflow-hidden ${
+          sidebarOpen ? 'opacity-100' : 'opacity-0'
+        }`}>
+          <div className="sidebar-logo-ring bg-blue-600/50">
+            <Hexagon className="w-4 h-4 text-white" fill="currentColor" />
           </div>
-
-          {/* Close (×) button */}
-          <button
-            onClick={closeSidebar}
-            className="p-1.5 rounded-lg text-blue-200 hover:bg-blue-600/50 hover:text-white transition-colors duration-150 cursor-pointer"
-            aria-label="Close menu"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div>
+            <p className="text-white font-bold text-sm leading-none whitespace-nowrap">HireHelper</p>
+            <p className="text-blue-200 text-[10px] leading-none mt-0.5 tracking-wider uppercase whitespace-nowrap">Platform</p>
+          </div>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          <p className="px-3 mb-3 text-[10px] font-bold uppercase tracking-widest text-blue-300/70">Navigation</p>
+        <nav className={`flex-1 px-3 py-4 space-y-1 overflow-y-auto overflow-hidden ${
+          sidebarOpen ? 'opacity-100' : 'opacity-0'
+        }`}>
+          <p className="px-3 mb-3 text-[10px] font-bold uppercase tracking-widest text-blue-300/70 whitespace-nowrap">Navigation</p>
           {NAV_ITEMS.map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                onClick={closeSidebar}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-all duration-200 ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium cursor-pointer transition-all duration-200 whitespace-nowrap ${
                   isActive
                     ? 'bg-white text-blue-700 shadow-sm'
                     : 'text-blue-100 hover:bg-white/10 hover:text-white'
@@ -141,25 +133,19 @@ export default function Dashboard() {
         </nav>
 
         {/* Logout */}
-        <div className="p-4 border-t border-blue-600/60">
+        <div className={`p-4 border-t border-blue-600/60 overflow-hidden ${
+          sidebarOpen ? 'opacity-100' : 'opacity-0'
+        }`}>
           <button
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-semibold 
-                       bg-blue-800/40 text-blue-100 hover:bg-red-500 hover:text-white transition-all duration-200 cursor-pointer"
+                       bg-blue-800/40 text-blue-100 hover:bg-red-500 hover:text-white transition-all duration-200 cursor-pointer whitespace-nowrap"
           >
             <LogOut className="w-[18px] h-[18px]" strokeWidth={2} />
             <span>Sign Out</span>
           </button>
         </div>
       </aside>
-
-      {/* Backdrop overlay — visible only when sidebar is open */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-slate-900/40 z-40 backdrop-blur-[1px]"
-          onClick={closeSidebar}
-        />
-      )}
 
       {/* ── Main Area ──────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
@@ -171,9 +157,9 @@ export default function Dashboard() {
             {/* Left: hamburger + breadcrumb */}
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setSidebarOpen(true)}
+                onClick={toggleSidebar}
                 className="p-2 rounded-lg hover:bg-slate-100 text-slate-600 cursor-pointer transition-colors duration-150 active:bg-slate-200"
-                aria-label="Open menu"
+                aria-label="Toggle menu"
               >
                 <Menu className="w-5 h-5" />
               </button>
