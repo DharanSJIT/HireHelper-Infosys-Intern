@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const { generateOtp } = require("../utils/generateOtp");
 const { sendOtp } = require("../utils/sendOtp");
 const cloudinary = require("../config/cloudinary");
+const { validatePassword } = require("../utils/validatePassword");
 
 exports.register = async (req, res) => {
   try {
@@ -20,8 +21,11 @@ exports.register = async (req, res) => {
         });
       } else {
         const otp = generateOtp();
-        existingUser.otp = otp;
+        const hashedOtp = await bcrypt.hash(otp, 10);
+
+        existingUser.otp = hashedOtp;
         existingUser.otpExpiry = Date.now() + 5 * 60 * 1000;
+
         await existingUser.save();
         await sendOtp(email_id, otp);
 
@@ -32,10 +36,7 @@ exports.register = async (req, res) => {
       }
     }
 
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
-
-    if (!passwordRegex.test(password)) {
+    if (!validatePassword(password)) {
       return res.status(400).json({
         message:
           "Password must contain uppercase, lowercase, number, special character and minimum 8 characters",
@@ -44,13 +45,14 @@ exports.register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = generateOtp();
+    const hashedOtp = await bcrypt.hash(otp, 10);
 
     await User.create({
       first_name,
       last_name,
       email_id,
       password: hashedPassword,
-      otp,
+      otp: hashedOtp,
       otpExpiry: Date.now() + 5 * 60 * 1000,
     });
 
@@ -69,8 +71,14 @@ exports.verifyOtp = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (user.otp !== otp || user.otpExpiry < Date.now())
+    if (!user.otp) {
+      return res.status(400).json({ message: "No OTP found" });
+    }
+    const isValidOtp = await bcrypt.compare(otp, user.otp);
+
+    if (!isValidOtp || user.otpExpiry < Date.now()) {
       return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
 
     user.isVerified = true;
     user.otp = null;
@@ -81,9 +89,7 @@ exports.verifyOtp = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, email: user.email_id },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      },
+      { expiresIn: "7d" },
     );
 
     res.json({ message: "Account verified successfully", token });
@@ -106,7 +112,7 @@ exports.login = async (req, res) => {
       return res.status(403).json({
         success: false,
         message: "Email not verified",
-        email: user.email,
+        email: user.email_id,
       });
     }
 
@@ -115,9 +121,11 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = jwt.sign(
+      { id: user._id, email: user.email_id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" },
+    );
 
     res.json({
       message: "Login successful",
@@ -145,8 +153,9 @@ exports.resendOtp = async (req, res) => {
       return res.status(400).json({ message: "User already verified" });
 
     const otp = generateOtp();
+    const hashedOtp = await bcrypt.hash(otp, 10);
 
-    user.otp = otp;
+    user.otp = hashedOtp;
     user.otpExpiry = Date.now() + 5 * 60 * 1000;
 
     await user.save();
@@ -168,8 +177,9 @@ exports.forgotPassword = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const otp = generateOtp();
+    const hashedOtp = await bcrypt.hash(otp, 10);
 
-    user.otp = otp;
+    user.otp = hashedOtp;
     user.otpExpiry = Date.now() + 5 * 60 * 1000;
 
     await user.save();
@@ -190,13 +200,15 @@ exports.resetPassword = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (user.otp !== otp || user.otpExpiry < Date.now())
+    if (!user.otp) {
+      return res.status(400).json({ message: "No OTP found" });
+    }
+
+    const isValidOtp = await bcrypt.compare(otp, user.otp);
+    if (!isValidOtp || user.otpExpiry < Date.now())
       return res.status(400).json({ message: "Invalid or expired OTP" });
 
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
-
-    if (!passwordRegex.test(newPassword)) {
+    if (!validatePassword(newPassword)) {
       return res.status(400).json({
         message:
           "Password must contain uppercase, lowercase, number, special character and minimum 8 characters",
@@ -226,14 +238,14 @@ exports.getProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const tasksPosted = await Task.countDocuments({ createdBy: req.user.id });
-    const tasksCompleted = await Task.countDocuments({
-      createdBy: req.user.id,
-      status: "completed",
-    });
-    const requestsSent = await Request.countDocuments({
-      requestedBy: req.user.id,
-    });
+    const [tasksPosted, tasksCompleted, requestsSent] = await Promise.all([
+      Task.countDocuments({ createdBy: req.user.id }),
+      Task.countDocuments({
+        createdBy: req.user.id,
+        status: "completed",
+      }),
+      Request.countDocuments({ requestedBy: req.user.id }),
+    ]);
 
     res.json({
       ...user,
