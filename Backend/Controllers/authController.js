@@ -8,9 +8,12 @@ const { sendOtp } = require("../utils/sendOtp");
 const cloudinary = require("../config/cloudinary");
 const { validatePassword } = require("../utils/validatePassword");
 
+/* ================= REGISTER ================= */
+
 exports.register = async (req, res) => {
   try {
     const { first_name, last_name, email_id, password } = req.body;
+
     const existingUser = await User.findOne({ email_id });
 
     if (existingUser) {
@@ -20,18 +23,21 @@ exports.register = async (req, res) => {
           message: "User already exists",
         });
       } else {
+        // resend OTP for unverified user
         const otp = generateOtp();
         const hashedOtp = await bcrypt.hash(otp, 10);
 
         existingUser.otp = hashedOtp;
         existingUser.otpExpiry = Date.now() + 5 * 60 * 1000;
-
         await existingUser.save();
+
         await sendOtp(email_id, otp);
 
         return res.status(200).json({
           success: true,
           message: "OTP resent. Please verify your account.",
+          redirectToVerify: true,
+          email: email_id,
         });
       }
     }
@@ -54,26 +60,34 @@ exports.register = async (req, res) => {
       password: hashedPassword,
       otp: hashedOtp,
       otpExpiry: Date.now() + 5 * 60 * 1000,
+      isVerified: false,
     });
 
     await sendOtp(email_id, otp);
 
-    res.status(201).json({ message: "User registered. OTP sent to email." });
+    res.status(201).json({
+      success: true,
+      message: "User registered. OTP sent to email.",
+      redirectToVerify: true,
+      email: email_id,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+/* ================= VERIFY OTP ================= */
+
 exports.verifyOtp = async (req, res) => {
   try {
     const { email_id, otp } = req.body;
-    const user = await User.findOne({ email_id });
 
+    const user = await User.findOne({ email_id });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (!user.otp) {
+    if (!user.otp)
       return res.status(400).json({ message: "No OTP found" });
-    }
+
     const isValidOtp = await bcrypt.compare(otp, user.otp);
 
     if (!isValidOtp || user.otpExpiry < Date.now()) {
@@ -83,20 +97,25 @@ exports.verifyOtp = async (req, res) => {
     user.isVerified = true;
     user.otp = null;
     user.otpExpiry = null;
-
     await user.save();
 
     const token = jwt.sign(
       { id: user._id, email: user.email_id },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" },
+      { expiresIn: "7d" }
     );
 
-    res.json({ message: "Account verified successfully", token });
+    res.json({
+      success: true,
+      message: "Account verified successfully",
+      token,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
+/* ================= LOGIN ================= */
 
 exports.login = async (req, res) => {
   try {
@@ -108,11 +127,22 @@ exports.login = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // 🔥 UPDATED LOGIC HERE
     if (!user.isVerified) {
+      const otp = generateOtp();
+      const hashedOtp = await bcrypt.hash(otp, 10);
+
+      user.otp = hashedOtp;
+      user.otpExpiry = Date.now() + 5 * 60 * 1000;
+      await user.save();
+
+      await sendOtp(email_id, otp);
+
       return res.status(403).json({
         success: false,
-        message: "Email not verified",
-        email: user.email_id,
+        message: "Email not verified. New OTP sent.",
+        redirectToVerify: true,
+        email: email_id,
       });
     }
 
@@ -124,10 +154,11 @@ exports.login = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, email: user.email_id },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" },
+      { expiresIn: "7d" }
     );
 
     res.json({
+      success: true,
       message: "Login successful",
       token,
       user: {
@@ -141,12 +172,13 @@ exports.login = async (req, res) => {
   }
 };
 
+/* ================= RESEND OTP ================= */
+
 exports.resendOtp = async (req, res) => {
   try {
     const { email_id } = req.body;
 
     const user = await User.findOne({ email_id });
-
     if (!user) return res.status(404).json({ message: "User not found" });
 
     if (user.isVerified)
@@ -157,23 +189,26 @@ exports.resendOtp = async (req, res) => {
 
     user.otp = hashedOtp;
     user.otpExpiry = Date.now() + 5 * 60 * 1000;
-
     await user.save();
 
     await sendOtp(email_id, otp);
 
-    res.json({ message: "OTP resent successfully" });
+    res.json({
+      success: true,
+      message: "OTP resent successfully",
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
+/* ================= FORGOT PASSWORD ================= */
 
 exports.forgotPassword = async (req, res) => {
   try {
     const { email_id } = req.body;
 
     const user = await User.findOne({ email_id });
-
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const otp = generateOtp();
@@ -181,7 +216,6 @@ exports.forgotPassword = async (req, res) => {
 
     user.otp = hashedOtp;
     user.otpExpiry = Date.now() + 5 * 60 * 1000;
-
     await user.save();
 
     await sendOtp(email_id, otp);
@@ -192,19 +226,20 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
+/* ================= RESET PASSWORD ================= */
+
 exports.resetPassword = async (req, res) => {
   try {
     const { email_id, otp, newPassword } = req.body;
 
     const user = await User.findOne({ email_id });
-
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (!user.otp) {
+    if (!user.otp)
       return res.status(400).json({ message: "No OTP found" });
-    }
 
     const isValidOtp = await bcrypt.compare(otp, user.otp);
+
     if (!isValidOtp || user.otpExpiry < Date.now())
       return res.status(400).json({ message: "Invalid or expired OTP" });
 
@@ -229,14 +264,15 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
+/* ================= PROFILE ================= */
+
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id)
       .select("-password -otp -otpExpiry")
       .lean();
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     const [tasksPosted, tasksCompleted, requestsSent] = await Promise.all([
       Task.countDocuments({ createdBy: req.user.id }),
@@ -260,6 +296,8 @@ exports.getProfile = async (req, res) => {
   }
 };
 
+/* ================= UPDATE PROFILE PICTURE ================= */
+
 exports.updateProfilePicture = async (req, res) => {
   try {
     const { profilePicture } = req.body;
@@ -275,7 +313,7 @@ exports.updateProfilePicture = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.user.id,
       { profilePicture: uploadResult.secure_url },
-      { new: true },
+      { new: true }
     ).select("-password -otp -otpExpiry");
 
     res.json(user);
