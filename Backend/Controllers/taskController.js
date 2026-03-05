@@ -1,6 +1,7 @@
 const Task = require("../Models/Task");
 const cloudinary = require("../config/cloudinary");
 
+// CREATE TASK
 exports.createTask = async (req, res) => {
   try {
     const {
@@ -21,7 +22,7 @@ exports.createTask = async (req, res) => {
         message: "All required fields must be provided",
       });
     }
-    
+
     let imageUrl = "";
 
     if (picture) {
@@ -32,6 +33,7 @@ exports.createTask = async (req, res) => {
           { quality: "auto" },
         ],
       });
+
       imageUrl = uploadResult.secure_url;
     }
 
@@ -54,21 +56,31 @@ exports.createTask = async (req, res) => {
       task,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
+// GET MY TASKS
 exports.getMyTasks = async (req, res) => {
   try {
-    const tasks = await Task.find({ createdBy: req.user.id }).sort({
-      createdAt: -1,
-    });
+    const tasks = await Task.find({
+      createdBy: req.user.id,
+    })
+      .sort({ createdAt: -1 })
+      .lean();
+
     res.json({
       success: true,
       tasks,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
@@ -77,13 +89,14 @@ exports.getFeedTasks = async (req, res) => {
   try {
     const tasks = await Task.find({
       createdBy: { $ne: req.user.id },
-
       status: "open",
     })
-
-      .populate("createdBy", "first_name last_name profilePicture")
-
-      .sort({ createdAt: -1 });
+      .populate({
+        path: "createdBy",
+        select: "first_name last_name profilePicture",
+      })
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.json({
       success: true,
@@ -91,14 +104,18 @@ exports.getFeedTasks = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      error: error.message,
+      success: false,
+      message: error.message,
     });
   }
 };
 
+// GET TASK BY ID
 exports.getTaskById = async (req, res) => {
   try {
-    const task = await Task.findById(req.params.id).populate("createdBy");
+    const task = await Task.findById(req.params.id)
+      .populate("createdBy", "first_name last_name profilePicture")
+      .lean();
 
     if (!task) {
       return res.status(404).json({
@@ -113,16 +130,21 @@ exports.getTaskById = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      error: error.message,
+      success: false,
+      message: error.message,
     });
   }
 };
 
+// GET ASSIGNED TASKS
 exports.getAssignedTasks = async (req, res) => {
   try {
     const tasks = await Task.find({
       assignedTo: req.user.id,
-    }).populate("createdBy", "first_name profilePicture");
+    })
+      .populate("createdBy", "first_name last_name profilePicture")
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.json({
       success: true,
@@ -130,7 +152,8 @@ exports.getAssignedTasks = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      error: error.message,
+      success: false,
+      message: error.message,
     });
   }
 };

@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { getFeedTasks, requestTask } from '../config/api';
+import React, { useEffect, useMemo, useState } from "react";
+import { getFeedTasks, requestTask } from "../config/api";
 import {
   MapPin,
   Calendar as CalendarIcon,
@@ -8,13 +8,18 @@ import {
   Loader2,
   CheckCircle2,
   Rss,
-} from 'lucide-react';
+} from "lucide-react";
 
 function formatDate(dateValue) {
-  if (!dateValue) return '-';
+  if (!dateValue) return "-";
   const date = new Date(dateValue);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 function MetaRow({ icon, children }) {
@@ -29,45 +34,64 @@ function MetaRow({ icon, children }) {
 export default function Feed() {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [requestState, setRequestState] = useState({});
 
   useEffect(() => {
     const loadFeed = async () => {
       try {
         setLoading(true);
-        setError('');
+        setError("");
+
         const { data } = await getFeedTasks();
         setTasks(data?.tasks || []);
       } catch (err) {
-        setError(err.response?.data?.message || err.response?.data?.error || 'Failed to load feed.');
+        setError(
+          err.response?.data?.message ||
+            err.response?.data?.error ||
+            "Failed to load tasks"
+        );
       } finally {
         setLoading(false);
       }
     };
+
     loadFeed();
   }, []);
 
-  const pendingIds = useMemo(
-    () => new Set(Object.keys(requestState).filter((id) => requestState[id]?.loading)),
-    [requestState],
-  );
+  const pendingIds = useMemo(() => {
+    return new Set(
+      Object.keys(requestState).filter((id) => requestState[id]?.loading)
+    );
+  }, [requestState]);
 
   const handleRequest = async (taskId) => {
-    setRequestState((prev) => ({ ...prev, [taskId]: { loading: true, error: '', success: '' } }));
+    setRequestState((prev) => ({
+      ...prev,
+      [taskId]: { loading: true, error: "", success: "" },
+    }));
+
     try {
       const { data } = await requestTask(taskId);
+
       setRequestState((prev) => ({
         ...prev,
-        [taskId]: { loading: false, error: '', success: data?.message || 'Request sent!' },
+        [taskId]: {
+          loading: false,
+          success: data?.message || "Request Sent Successfully",
+          error: "",
+        },
       }));
     } catch (err) {
       setRequestState((prev) => ({
         ...prev,
         [taskId]: {
           loading: false,
-          success: '',
-          error: err.response?.data?.message || err.response?.data?.error || 'Failed to send request.',
+          success: "",
+          error:
+            err.response?.data?.message ||
+            err.response?.data?.error ||
+            "Request failed",
         },
       }));
     }
@@ -75,150 +99,146 @@ export default function Feed() {
 
   return (
     <div className="max-w-[80vw] mx-auto space-y-6 pb-12">
-      {/* Page Header */}
+      {/* HEADER */}
       <div className="surface-card p-6 md:p-8 flex items-center justify-between gap-4">
         <div>
           <h2 className="section-head">Task Feed</h2>
           <p className="section-sub mt-1 max-w-lg">
-            Browse open tasks from people in your area. Find something you can help with and send a request!
+            Browse open tasks posted by users and help them.
           </p>
         </div>
-        <div className="flex flex-col items-center gap-2">
-          {!loading && !error && (
-            <span className="inline-flex items-center justify-center bg-blue-50 text-blue-700 border border-blue-200 shadow-sm rounded-full text-sm font-bold px-4 py-1.5 tracking-wide">
-              {tasks.length} {tasks.length === 1 ? 'Task' : 'Tasks'} Open
-            </span>
-          )}
-        </div>
+
+        {!loading && !error && (
+          <span className="inline-flex items-center justify-center bg-blue-50 text-blue-700 border border-blue-200 shadow-sm rounded-full text-sm font-bold px-4 py-1.5">
+            {tasks.length} {tasks.length === 1 ? "Task" : "Tasks"} Open
+          </span>
+        )}
       </div>
 
-      {/* Loading */}
+      {/* LOADING */}
       {loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="surface-card p-6 space-y-4">
-              <div className="flex items-start justify-between">
-                <div className="skeleton h-5 w-2/3 rounded-md" />
-                <div className="skeleton h-5 w-16 rounded-full" />
-              </div>
-              <div className="space-y-2 mt-3">
-                <div className="skeleton h-3.5 w-full rounded-sm" />
-                <div className="skeleton h-3.5 w-4/5 rounded-sm" />
-                <div className="skeleton h-3.5 w-3/5 rounded-sm" />
-              </div>
-              <div className="skeleton h-10 w-full rounded-lg mt-4" />
-            </div>
-          ))}
+        <div className="text-center py-20">
+          <Loader2 className="animate-spin w-8 h-8 mx-auto text-blue-600" />
+          <p className="text-sm text-gray-500 mt-3">Loading tasks...</p>
         </div>
       )}
 
-      {/* Error */}
+      {/* ERROR */}
       {error && (
-        <div className="alert-error mt-2">
-          <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-          <p className="text-sm font-medium leading-relaxed">{error}</p>
+        <div className="alert-error mt-2 flex gap-2 items-center">
+          <AlertCircle className="w-5 h-5" />
+          <p>{error}</p>
         </div>
       )}
 
-      {/* Empty */}
+      {/* EMPTY */}
       {!loading && !error && tasks.length === 0 && (
-        <div className="surface-card mt-6">
-          <div className="empty-state">
-            <div className="empty-icon text-slate-400">
-              <Rss className="w-8 h-8" />
-            </div>
-            <h3 className="section-head text-lg">No open tasks right now</h3>
-            <p className="section-sub mt-2 max-w-sm mx-auto text-center">
-              New tasks will appear here as soon as someone posts one. Check back soon!
-            </p>
-          </div>
+        <div className="surface-card mt-6 text-center py-12">
+          <Rss className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+          <h3 className="text-lg font-semibold">No open tasks</h3>
+          <p className="text-sm text-gray-500 mt-2">
+            New tasks will appear here soon.
+          </p>
         </div>
       )}
 
-      {/* Task Grid */}
+      {/* TASK GRID */}
       {!loading && !error && tasks.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tasks.map((task) => {
-            const state = requestState[task._id] || { loading: false, error: '', success: '' };
+            const state = requestState[task._id] || {
+              loading: false,
+              error: "",
+              success: "",
+            };
 
             const isDisabled =
               state.loading ||
               !!state.success ||
               pendingIds.has(task._id) ||
-              task.status?.toLowerCase() !== 'open';
+              task.status !== "open";
+
+            const userName = task.createdBy
+              ? `${task.createdBy.first_name || ""} ${
+                  task.createdBy.last_name || ""
+                }`
+              : "Anonymous";
 
             return (
-              <article key={task._id} className="surface-card-hover overflow-hidden flex flex-col group">
-                {/* Task Image */}
+              <article
+                key={task._id}
+                className="surface-card-hover overflow-hidden flex flex-col"
+              >
+                {/* IMAGE */}
                 {task.picture && (
-                  <div className="h-44 w-full overflow-hidden border-b border-slate-100 relative">
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent z-10 pointer-events-none" />
+                  <div className="h-44 w-full overflow-hidden border-b">
                     <img
                       src={task.picture}
                       alt={task.title}
-                      className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700 ease-in-out"
+                      className="h-full w-full object-cover"
                     />
                   </div>
                 )}
 
                 <div className="p-6 flex flex-col flex-1">
-                  <div className="flex items-start justify-between gap-3 mb-4">
-                    <h3 className="text-lg font-bold text-slate-900 leading-snug line-clamp-2 group-hover:text-blue-700 transition-colors">
+                  {/* TITLE */}
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="text-lg font-bold text-slate-900">
                       {task.title}
                     </h3>
-                    <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase">
+
+                    <span className="bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase">
                       {task.status}
                     </span>
                   </div>
 
-                  {/* Description */}
-                  <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 mb-5 shadow-inner">
-                    <p className="text-[14px] text-slate-600 line-clamp-3 leading-relaxed">{task.description}</p>
-                  </div>
+                  {/* DESCRIPTION */}
+                  <p className="text-sm text-gray-600 mb-4 line-clamp-3">
+                    {task.description}
+                  </p>
 
-                  {/* Meta */}
-                  <div className="space-y-3 mb-6 bg-white p-2 rounded-lg">
+                  {/* META */}
+                  <div className="space-y-2 mb-4">
                     <MetaRow icon={<User className="w-4 h-4" />}>
-                      {task.createdBy?.first_name || 'Anonymous'} {task.createdBy?.last_name || ''}
+                      {userName || "Anonymous"}
                     </MetaRow>
+
                     <MetaRow icon={<MapPin className="w-4 h-4" />}>
                       {task.location}
                     </MetaRow>
+
                     <MetaRow icon={<CalendarIcon className="w-4 h-4" />}>
-                      {formatDate(task.startDate)}{task.startTime ? ` · ${task.startTime}` : ''}
+                      {formatDate(task.startDate)}{" "}
+                      {task.startTime ? `• ${task.startTime}` : ""}
                     </MetaRow>
                   </div>
 
-                  {/* Category Tag */}
+                  {/* CATEGORY */}
                   {task.category && (
-                    <div className="mb-5 flex flex-wrap gap-2">
-                      <span className="badge badge-blue">{task.category}</span>
-                    </div>
+                    <span className="inline-block bg-blue-50 text-blue-700 text-xs font-semibold px-2 py-1 rounded mb-4">
+                      {task.category}
+                    </span>
                   )}
 
-                  <div className="mt-auto pt-2 border-t border-slate-100">
+                  {/* REQUEST BUTTON */}
+                  <div className="mt-auto">
                     {state.error && (
-                      <div className="mb-3 text-red-600 text-xs font-semibold">
-                        {state.error}
-                      </div>
+                      <p className="text-xs text-red-500 mb-2">{state.error}</p>
                     )}
 
                     {state.success && (
-                      <div className="mb-3 text-emerald-600 text-xs font-semibold">
+                      <p className="text-xs text-green-600 mb-2">
                         {state.success}
-                      </div>
+                      </p>
                     )}
 
                     <button
-                      type="button"
                       onClick={() => handleRequest(task._id)}
                       disabled={isDisabled}
-                      className={`w-full py-3 rounded-xl text-sm font-bold transition-all duration-200 ${
+                      className={`w-full py-2.5 rounded-lg text-sm font-semibold transition ${
                         state.success
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-300'
-                          : task.status?.toLowerCase() !== 'open'
-                          ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                          : 'bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed'
+                          ? "bg-green-100 text-green-700"
+                          : "bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
                       }`}
                     >
                       {state.loading ? (
@@ -231,10 +251,10 @@ export default function Feed() {
                           <CheckCircle2 className="w-4 h-4" />
                           Request Sent
                         </span>
-                      ) : task.status?.toLowerCase() !== 'open' ? (
-                        'Task Closed'
+                      ) : task.status !== "open" ? (
+                        "Task Closed"
                       ) : (
-                        'Send Request to Help'
+                        "Send Request to Help"
                       )}
                     </button>
                   </div>
