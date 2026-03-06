@@ -157,3 +157,126 @@ exports.getAssignedTasks = async (req, res) => {
     });
   }
 };
+
+
+
+
+/* ===================================== */
+/*            EDIT TASK                  */
+/* ===================================== */
+
+exports.updateTask = async (req, res) => {
+  try {
+    const taskId = req.params.id;
+
+    const task = await Task.findById(taskId);
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    // Only creator can edit
+    if (task.createdBy.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not allowed to edit this task",
+      });
+    }
+
+    const {
+      title,
+      description,
+      category,
+      location,
+      startDate,
+      startTime,
+      endDate,
+      endTime,
+      picture,
+    } = req.body;
+
+    let imageUrl = task.picture;
+
+    if (picture) {
+      const uploadResult = await cloudinary.uploader.upload(picture, {
+        folder: "hirehelper/tasks",
+      });
+
+      imageUrl = uploadResult.secure_url;
+    }
+
+    const updatedTask = await Task.findByIdAndUpdate(
+      taskId,
+      {
+        title,
+        description,
+        category,
+        location,
+        startDate,
+        startTime,
+        endDate,
+        endTime,
+        picture: imageUrl,
+      },
+      { new: true }
+    );
+
+    res.json({
+      success: true,
+      message: "Task updated successfully",
+      task: updatedTask,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+
+/* ===================================== */
+/*            DELETE TASK                */
+/* ===================================== */
+
+exports.deleteTask = async (req, res) => {
+  try {
+
+    const taskId = req.params.id;
+
+    const task = await Task.findById(taskId);
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    // Only creator can delete
+    if (task.createdBy.toString() !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not allowed to delete this task",
+      });
+    }
+
+    await Task.findByIdAndDelete(taskId);
+
+    res.json({
+      success: true,
+      message: "Task deleted successfully",
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

@@ -58,5 +58,7 @@ export const rejectRequest = (requestId) => RequestAPI.patch(`/${requestId}/reje
 export const getNotifications = () => RequestAPI.get('/notifications');
 export const markNotificationRead = (notificationId) => RequestAPI.patch(`/notifications/${notificationId}/read`);
 export const markAllNotificationsRead = () => RequestAPI.patch('/notifications/read-all');
+export const deleteTask = (id) => TaskAPI.delete(`/${id}`);
+export const updateTask = (id, data) => TaskAPI.put(`/${id}`, data);
 
 export default API;

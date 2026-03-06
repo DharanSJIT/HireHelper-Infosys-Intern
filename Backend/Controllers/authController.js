@@ -12,7 +12,15 @@ const { validatePassword } = require("../utils/validatePassword");
 
 exports.register = async (req, res) => {
   try {
-    const { first_name, last_name, email_id, password } = req.body;
+    const { first_name, last_name, phone_number, email_id, password } = req.body;
+
+    // ✅ NEW: phone number validation
+    if (!phone_number) {
+      return res.status(400).json({
+        success: false,
+        message: "Phone number is required",
+      });
+    }
 
     const existingUser = await User.findOne({ email_id });
 
@@ -53,9 +61,11 @@ exports.register = async (req, res) => {
     const otp = generateOtp();
     const hashedOtp = await bcrypt.hash(otp, 10);
 
+    // ✅ UPDATED: phone_number saved
     await User.create({
       first_name,
       last_name,
+      phone_number,
       email_id,
       password: hashedPassword,
       otp: hashedOtp,
@@ -127,7 +137,7 @@ exports.login = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // 🔥 UPDATED LOGIC HERE
+    // OTP resend if not verified
     if (!user.isVerified) {
       const otp = generateOtp();
       const hashedOtp = await bcrypt.hash(otp, 10);
@@ -165,6 +175,7 @@ exports.login = async (req, res) => {
         id: user._id,
         first_name: user.first_name,
         email_id: user.email_id,
+        phone_number: user.phone_number, // ✅ added
       },
     });
   } catch (error) {
@@ -235,9 +246,6 @@ exports.resetPassword = async (req, res) => {
     const user = await User.findOne({ email_id });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (!user.otp)
-      return res.status(400).json({ message: "No OTP found" });
-
     const isValidOtp = await bcrypt.compare(otp, user.otp);
 
     if (!isValidOtp || user.otpExpiry < Date.now())
@@ -272,14 +280,9 @@ exports.getProfile = async (req, res) => {
       .select("-password -otp -otpExpiry")
       .lean();
 
-    if (!user) return res.status(404).json({ message: "User not found" });
-
     const [tasksPosted, tasksCompleted, requestsSent] = await Promise.all([
       Task.countDocuments({ createdBy: req.user.id }),
-      Task.countDocuments({
-        createdBy: req.user.id,
-        status: "completed",
-      }),
+      Task.countDocuments({ createdBy: req.user.id, status: "completed" }),
       Request.countDocuments({ requestedBy: req.user.id }),
     ]);
 

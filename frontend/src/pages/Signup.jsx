@@ -16,32 +16,42 @@ function EyeIcon({ open }) {
 }
 
 const passwordRules = [
-  { id: 'len',   label: 'At least 8 characters',      test: (p) => p.length >= 8 },
-  { id: 'upper', label: 'One uppercase letter',        test: (p) => /[A-Z]/.test(p) },
-  { id: 'lower', label: 'One lowercase letter',        test: (p) => /[a-z]/.test(p) },
-  { id: 'num',   label: 'One number',                  test: (p) => /[0-9]/.test(p) },
-  { id: 'sym',   label: 'One special character',       test: (p) => /[!@#$%^&*(),.?":{}|<>]/.test(p) },
+  { id: 'len', label: 'At least 8 characters', test: (p) => p.length >= 8 },
+  { id: 'upper', label: 'One uppercase letter', test: (p) => /[A-Z]/.test(p) },
+  { id: 'lower', label: 'One lowercase letter', test: (p) => /[a-z]/.test(p) },
+  { id: 'num', label: 'One number', test: (p) => /[0-9]/.test(p) },
+  { id: 'sym', label: 'One special character', test: (p) => /[!@#$%^&*(),.?":{}|<>]/.test(p) },
 ];
 
 export default function Signup() {
+
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
+
     e.preventDefault();
     setError('');
 
-    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+    if (!firstName || !lastName || !phoneNumber || !email || !password || !confirmPassword) {
       setError('Please fill in all required fields.');
+      return;
+    }
+
+    if (!/^[0-9]{10}$/.test(phoneNumber)) {
+      setError('Phone number must be exactly 10 digits.');
       return;
     }
 
@@ -57,11 +67,23 @@ export default function Signup() {
     }
 
     setLoading(true);
+
     try {
-      await register({ first_name: firstName, last_name: lastName, email_id: email, password });
+
+      await register({
+        first_name: firstName,
+        last_name: lastName,
+        phone_number: phoneNumber,
+        email_id: email,
+        password
+      });
+
       navigate('/verify-otp', { state: { email } });
+
     } catch (err) {
+
       setError(err.response?.data?.message || 'Registration failed. Please try again.');
+
     } finally {
       setLoading(false);
     }
@@ -71,7 +93,6 @@ export default function Signup() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-[500px]">
 
-        {/* Brand */}
         <div className="text-center mb-8">
           <div className="inline-flex w-12 h-12 bg-blue-600 rounded-xl items-center justify-center mb-4">
             <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" className="w-6 h-6 stroke-white">
@@ -82,41 +103,32 @@ export default function Signup() {
           <p className="text-sm text-slate-500 mt-1">Join the HireHelper platform for free</p>
         </div>
 
-        {/* Card */}
         <div className="surface-card px-7 py-8">
 
-          {/* Error */}
           {error && (
             <div className="alert-error mb-5">
-              <svg viewBox="0 0 24 24" fill="none" strokeWidth="1.75" className="w-4 h-4 stroke-red-600 flex-shrink-0 mt-0.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-              </svg>
               {error}
             </div>
           )}
 
           <form onSubmit={handleSignup} className="space-y-4">
 
-            {/* Name Row */}
             <div className="grid grid-cols-2 gap-3">
               <div className="input-group">
-                <label htmlFor="signup-first" className="input-label">First Name *</label>
+                <label className="input-label">First Name *</label>
                 <input
-                  id="signup-first"
                   type="text"
-                  autoComplete="given-name"
                   placeholder="First"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   className="input-field"
                 />
               </div>
+
               <div className="input-group">
-                <label htmlFor="signup-last" className="input-label">Last Name *</label>
+                <label className="input-label">Last Name *</label>
                 <input
-                  id="signup-last"
                   type="text"
-                  autoComplete="family-name"
                   placeholder="Last"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
@@ -125,13 +137,10 @@ export default function Signup() {
               </div>
             </div>
 
-            {/* Email */}
             <div className="input-group">
-              <label htmlFor="signup-email" className="input-label">Email Address *</label>
+              <label className="input-label">Email Address *</label>
               <input
-                id="signup-email"
                 type="email"
-                autoComplete="email"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -139,109 +148,74 @@ export default function Signup() {
               />
             </div>
 
-            {/* Phone */}
             <div className="input-group">
-              <label htmlFor="signup-phone" className="input-label">
-                Phone Number
-                <span className="normal-case font-normal text-slate-400 ml-1">(optional)</span>
-              </label>
+              <label className="input-label">Phone Number *</label>
               <input
-                id="signup-phone"
                 type="tel"
-                autoComplete="tel"
-                placeholder="+1 (555) 000-0000"
+                placeholder="0123456789"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
                 className="input-field"
               />
             </div>
 
-            {/* Password */}
             <div className="input-group">
-              <label htmlFor="signup-password" className="input-label">Password *</label>
+              <label className="input-label">Password *</label>
               <div className="relative">
                 <input
-                  id="signup-password"
                   type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
                   placeholder="Create a password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="input-field pr-11"
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer transition-colors duration-150"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
                 >
                   <EyeIcon open={showPassword} />
                 </button>
               </div>
-
-              {/* Password strength checklist */}
-              {password.length > 0 && (
-                <div className="mt-2 grid grid-cols-2 gap-1">
-                  {passwordRules.map((rule) => {
-                    const passed = rule.test(password);
-                    return (
-                      <div key={rule.id} className="flex items-center gap-1.5">
-                        <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${passed ? 'bg-emerald-500' : 'bg-slate-300'}`} />
-                        <span className={`text-[11px] ${passed ? 'text-emerald-700' : 'text-slate-500'}`}>{rule.label}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
             </div>
 
-            {/* Confirm Password */}
             <div className="input-group">
-              <label htmlFor="signup-confirm" className="input-label">Confirm Password *</label>
+              <label className="input-label">Confirm Password *</label>
+
               <div className="relative">
                 <input
-                  id="signup-confirm"
                   type={showConfirmPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
                   placeholder="Repeat your password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="input-field pr-11"
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer transition-colors duration-150"
-                  aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
                 >
                   <EyeIcon open={showConfirmPassword} />
                 </button>
               </div>
             </div>
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
               className="btn-primary w-full py-2.5 mt-1"
             >
-              {loading ? (
-                <>
-                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  Creating account...
-                </>
-              ) : 'Create Account'}
+              {loading ? 'Creating account...' : 'Create Account'}
             </button>
+
           </form>
         </div>
 
-        {/* Sign In Link */}
         <p className="mt-5 text-center text-sm text-slate-500">
           Already have an account?{' '}
-          <Link to="/login" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-150">
+          <Link to="/login" className="font-semibold text-blue-600">
             Sign in
           </Link>
         </p>
