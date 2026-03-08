@@ -1,71 +1,49 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { getMyTasks, deleteTask } from '../config/api';
-import { useNavigate } from 'react-router-dom';
-import { 
-  Search, 
-  MapPin, 
-  Calendar as CalendarIcon, 
-  Clock, 
-  XCircle, 
-  LayoutList, 
-  AlertCircle, 
+import React, { useEffect, useMemo, useState } from "react";
+import { getMyTasks, deleteTask } from "../config/api";
+import { useNavigate } from "react-router-dom";
+import {
+  Search,
+  MapPin,
+  Clock,
+  AlertCircle,
   Inbox,
-  Filter,
-  ArrowDownWideNarrow,
   Pencil,
-  Trash
-} from 'lucide-react';
-
-function formatDate(dateValue) {
-  if (!dateValue) return '-';
-  const date = new Date(dateValue);
-  if (Number.isNaN(date.getTime())) return '-';
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
+  Trash,
+} from "lucide-react";
 
 function formatDateTime(dateValue, timeValue) {
-  const datePart = formatDate(dateValue);
-  return `${datePart}${timeValue ? `, ${timeValue}` : ''}`;
-}
+  if (!dateValue) return "-";
+  const date = new Date(dateValue);
 
-function statusBadge(status) {
-  if (status === 'open')      return 'badge-green';
-  if (status === 'assigned')  return 'badge-amber';
-  return 'badge-slate';
-}
+  const datePart = date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 
-function statusDot(status) {
-  if (status === 'open')      return 'bg-emerald-500';
-  if (status === 'assigned')  return 'bg-amber-500';
-  return 'bg-slate-400';
+  return `${datePart}${timeValue ? `, ${timeValue}` : ""}`;
 }
-
-const SUMMARY_CONFIG = [
-  { key: 'total', label: 'Total Tasks', colorClass: 'text-slate-900', borderClass: 'border-slate-200 hover:border-slate-300', bgClass: 'bg-white' },
-  { key: 'open', label: 'Open', colorClass: 'text-emerald-700', borderClass: 'border-emerald-200 hover:border-emerald-300', bgClass: 'bg-emerald-50/50' },
-  { key: 'assigned', label: 'Assigned', colorClass: 'text-amber-700', borderClass: 'border-amber-200 hover:border-amber-300', bgClass: 'bg-amber-50/50' },
-  { key: 'completed', label: 'Completed', colorClass: 'text-blue-700', borderClass: 'border-blue-200 hover:border-blue-300', bgClass: 'bg-blue-50/50' },
-];
 
 export default function MyTasks() {
-
   const navigate = useNavigate();
 
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [query, setQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('newest');
+  const [error, setError] = useState("");
+  const [query, setQuery] = useState("");
+
+  const DEFAULT_IMAGE =
+    "https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=800";
 
   const loadTasks = async () => {
     try {
       setLoading(true);
-      setError('');
+      setError("");
+
       const { data } = await getMyTasks();
       setTasks(data?.tasks || []);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load your tasks.');
+      setError(err.response?.data?.message || "Failed to load tasks");
     } finally {
       setLoading(false);
     }
@@ -76,109 +54,144 @@ export default function MyTasks() {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this task?")) return;
+    if (!window.confirm("Delete this task?")) return;
 
     try {
       await deleteTask(id);
       setTasks(tasks.filter((task) => task._id !== id));
-    } catch (err) {
+    } catch {
       alert("Failed to delete task");
     }
   };
 
   const handleEdit = (id) => {
-    navigate(`/edit-task/${id}`);
+    navigate(`/dashboard/edit-task/${id}`);
   };
 
-  const summary = useMemo(() => ({
-    total: tasks.length,
-    open: tasks.filter((t) => t.status === 'open').length,
-    assigned: tasks.filter((t) => t.status === 'assigned').length,
-    completed: tasks.filter((t) => t.status === 'completed').length,
-  }), [tasks]);
-
   const filteredTasks = useMemo(() => {
-    const search = query.trim().toLowerCase();
-    let list = tasks.filter((task) => {
-      const byStatus = statusFilter === 'all' || task.status === statusFilter;
-      const haystack = `${task.title} ${task.description} ${task.location} ${task.category}`.toLowerCase();
-      return byStatus && (!search || haystack.includes(search));
-    });
+    const search = query.toLowerCase();
 
-    list = [...list].sort((a, b) => {
-      if (sortBy === 'oldest') return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
-      if (sortBy === 'title') return (a.title || '').localeCompare(b.title || '');
-      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-    });
-
-    return list;
-  }, [tasks, query, statusFilter, sortBy]);
+    return tasks.filter((task) =>
+      `${task.title} ${task.description} ${task.location}`
+        .toLowerCase()
+        .includes(search)
+    );
+  }, [tasks, query]);
 
   return (
     <div className="max-w-[80vw] mx-auto space-y-6 pb-12">
 
-      {/* Task Grid */}
-      {!loading && !error && filteredTasks.length > 0 && (
+      {/* HEADER */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">My Tasks</h1>
+      </div>
+
+      {/* SEARCH */}
+      <div className="flex items-center gap-2 border rounded-lg px-3 py-2 w-full md:w-80">
+        <Search size={18} className="text-gray-400" />
+        <input
+          type="text"
+          placeholder="Search tasks..."
+          className="outline-none w-full"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
+
+      {/* LOADING */}
+      {loading && (
+        <div className="flex justify-center py-20 text-gray-500">
+          Loading tasks...
+        </div>
+      )}
+
+      {/* ERROR */}
+      {error && (
+        <div className="flex items-center gap-2 text-red-500">
+          <AlertCircle size={18} />
+          {error}
+        </div>
+      )}
+
+      {/* EMPTY */}
+      {!loading && filteredTasks.length === 0 && (
+        <div className="flex flex-col items-center py-20 text-gray-500">
+          <Inbox size={40} />
+          <p>No tasks found</p>
+        </div>
+      )}
+
+      {/* TASK GRID */}
+      {!loading && filteredTasks.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
           {filteredTasks.map((task) => (
-            <article key={task._id} className="surface-card-hover overflow-hidden flex flex-col group">
 
-              {task.picture && (
-                <div className="h-40 w-full overflow-hidden border-b border-slate-100">
-                  <img src={task.picture} alt={task.title} className="h-full w-full object-cover" />
-                </div>
-              )}
+            <article
+              key={task._id}
+              className="border rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition"
+            >
 
-              <div className="p-5 flex flex-col flex-1">
+              {/* IMAGE (always visible) */}
+              <div className="h-40 overflow-hidden">
+                <img
+                  src={task.picture || DEFAULT_IMAGE}
+                  alt={task.title}
+                  className="h-full w-full object-cover"
+                />
+              </div>
 
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <h3 className="text-[15px] font-bold text-slate-900 line-clamp-2">{task.title}</h3>
-                  <span className={`badge ${statusBadge(task.status)}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${statusDot(task.status)}`} />
-                    <span className="capitalize">{task.status}</span>
-                  </span>
-                </div>
+              <div className="p-5 flex flex-col">
 
-                <p className="text-[13px] text-slate-600 line-clamp-2 mb-4">
+                {/* TITLE */}
+                <h3 className="font-bold text-lg mb-2">
+                  {task.title}
+                </h3>
+
+                {/* DESCRIPTION */}
+                <p className="text-sm text-gray-600 line-clamp-2 mb-3">
                   {task.description}
                 </p>
 
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center gap-2 text-[13px] text-slate-600">
-                    <MapPin className="w-4 h-4 text-slate-400" />
-                    <span>{task.location}</span>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-[13px] text-slate-600">
-                    <Clock className="w-4 h-4 text-slate-400" />
-                    <span>{formatDateTime(task.startDate, task.startTime)}</span>
-                  </div>
+                {/* LOCATION */}
+                <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                  <MapPin size={16} />
+                  {task.location}
                 </div>
 
-                {/* EDIT DELETE BUTTONS */}
-                <div className="flex gap-3 mt-auto pt-3 border-t border-slate-100">
+                {/* DATE */}
+                <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
+                  <Clock size={16} />
+                  {formatDateTime(task.startDate, task.startTime)}
+                </div>
+
+                {/* ACTIONS */}
+                <div className="flex gap-4 border-t pt-3 mt-auto">
 
                   <button
                     onClick={() => handleEdit(task._id)}
-                    className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                    className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
                   >
-                    <Pencil size={16}/>
+                    <Pencil size={16} />
                     Edit
                   </button>
 
                   <button
                     onClick={() => handleDelete(task._id)}
-                    className="flex items-center gap-1 text-sm text-red-600 hover:text-red-800"
+                    className="flex items-center gap-1 text-red-600 hover:text-red-800"
                   >
-                    <Trash size={16}/>
+                    <Trash size={16} />
                     Delete
                   </button>
 
                 </div>
 
               </div>
+
             </article>
+
           ))}
+
         </div>
       )}
 

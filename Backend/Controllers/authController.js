@@ -12,9 +12,9 @@ const { validatePassword } = require("../utils/validatePassword");
 
 exports.register = async (req, res) => {
   try {
+
     const { first_name, last_name, phone_number, email_id, password } = req.body;
 
-    // ✅ NEW: phone number validation
     if (!phone_number) {
       return res.status(400).json({
         success: false,
@@ -25,29 +25,29 @@ exports.register = async (req, res) => {
     const existingUser = await User.findOne({ email_id });
 
     if (existingUser) {
+
       if (existingUser.isVerified) {
         return res.status(400).json({
           success: false,
           message: "User already exists",
         });
-      } else {
-        // resend OTP for unverified user
-        const otp = generateOtp();
-        const hashedOtp = await bcrypt.hash(otp, 10);
-
-        existingUser.otp = hashedOtp;
-        existingUser.otpExpiry = Date.now() + 5 * 60 * 1000;
-        await existingUser.save();
-
-        await sendOtp(email_id, otp);
-
-        return res.status(200).json({
-          success: true,
-          message: "OTP resent. Please verify your account.",
-          redirectToVerify: true,
-          email: email_id,
-        });
       }
+
+      const otp = generateOtp();
+      const hashedOtp = await bcrypt.hash(otp, 10);
+
+      existingUser.otp = hashedOtp;
+      existingUser.otpExpiry = Date.now() + 5 * 60 * 1000;
+
+      await existingUser.save();
+      await sendOtp(email_id, otp);
+
+      return res.json({
+        success: true,
+        message: "OTP resent. Please verify account",
+        redirectToVerify: true,
+        email: email_id
+      });
     }
 
     if (!validatePassword(password)) {
@@ -61,7 +61,6 @@ exports.register = async (req, res) => {
     const otp = generateOtp();
     const hashedOtp = await bcrypt.hash(otp, 10);
 
-    // ✅ UPDATED: phone_number saved
     await User.create({
       first_name,
       last_name,
@@ -70,33 +69,34 @@ exports.register = async (req, res) => {
       password: hashedPassword,
       otp: hashedOtp,
       otpExpiry: Date.now() + 5 * 60 * 1000,
-      isVerified: false,
+      isVerified: false
     });
 
     await sendOtp(email_id, otp);
 
     res.status(201).json({
       success: true,
-      message: "User registered. OTP sent to email.",
+      message: "User registered. OTP sent",
       redirectToVerify: true,
-      email: email_id,
+      email: email_id
     });
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+
 /* ================= VERIFY OTP ================= */
 
 exports.verifyOtp = async (req, res) => {
   try {
+
     const { email_id, otp } = req.body;
 
     const user = await User.findOne({ email_id });
-    if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (!user.otp)
-      return res.status(400).json({ message: "No OTP found" });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     const isValidOtp = await bcrypt.compare(otp, user.otp);
 
@@ -107,6 +107,7 @@ exports.verifyOtp = async (req, res) => {
     user.isVerified = true;
     user.otp = null;
     user.otpExpiry = null;
+
     await user.save();
 
     const token = jwt.sign(
@@ -118,17 +119,20 @@ exports.verifyOtp = async (req, res) => {
     res.json({
       success: true,
       message: "Account verified successfully",
-      token,
+      token
     });
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+
 /* ================= LOGIN ================= */
 
 exports.login = async (req, res) => {
   try {
+
     const { email_id, password } = req.body;
 
     const user = await User.findOne({ email_id });
@@ -137,26 +141,27 @@ exports.login = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // OTP resend if not verified
     if (!user.isVerified) {
+
       const otp = generateOtp();
       const hashedOtp = await bcrypt.hash(otp, 10);
 
       user.otp = hashedOtp;
       user.otpExpiry = Date.now() + 5 * 60 * 1000;
-      await user.save();
 
+      await user.save();
       await sendOtp(email_id, otp);
 
       return res.status(403).json({
         success: false,
         message: "Email not verified. New OTP sent.",
         redirectToVerify: true,
-        email: email_id,
+        email: email_id
       });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
@@ -174,52 +179,142 @@ exports.login = async (req, res) => {
       user: {
         id: user._id,
         first_name: user.first_name,
+        last_name: user.last_name,
         email_id: user.email_id,
-        phone_number: user.phone_number, // ✅ added
-      },
+        phone_number: user.phone_number
+      }
     });
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
+
+/* ================= UPDATE PROFILE ================= */
+
+exports.updateProfile = async (req, res) => {
+  try {
+
+    const { first_name, last_name, phone_number } = req.body;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      { first_name, last_name, phone_number },
+      { returnDocument: "after" }
+    ).select("-password -otp -otpExpiry");
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      user: updatedUser
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+/* ================= GET PROFILE ================= */
+
+exports.getProfile = async (req, res) => {
+  try {
+
+    const user = await User.findById(req.user.id)
+      .select("-password -otp -otpExpiry")
+      .lean();
+
+    const [tasksPosted, tasksCompleted, requestsSent] = await Promise.all([
+      Task.countDocuments({ createdBy: req.user.id }),
+      Task.countDocuments({ createdBy: req.user.id, status: "completed" }),
+      Request.countDocuments({ requestedBy: req.user.id })
+    ]);
+
+    res.json({
+      ...user,
+      stats: {
+        tasksPosted,
+        tasksCompleted,
+        requestsSent
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+/* ================= UPDATE PROFILE PICTURE ================= */
+
+exports.updateProfilePicture = async (req, res) => {
+  try {
+
+    const { profilePicture } = req.body;
+
+    const uploadResult = await cloudinary.uploader.upload(profilePicture, {
+      folder: "hirehelper/profiles",
+      transformation: [
+        { width: 500, height: 500, crop: "fill" },
+        { quality: "auto" }
+      ]
+    });
+
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { profilePicture: uploadResult.secure_url },
+      { returnDocument: "after" }
+    ).select("-password -otp -otpExpiry");
+
+    res.json(user);
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
 /* ================= RESEND OTP ================= */
 
 exports.resendOtp = async (req, res) => {
   try {
+
     const { email_id } = req.body;
 
     const user = await User.findOne({ email_id });
-    if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (user.isVerified)
-      return res.status(400).json({ message: "User already verified" });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
     const otp = generateOtp();
     const hashedOtp = await bcrypt.hash(otp, 10);
 
     user.otp = hashedOtp;
     user.otpExpiry = Date.now() + 5 * 60 * 1000;
-    await user.save();
 
+    await user.save();
     await sendOtp(email_id, otp);
 
     res.json({
       success: true,
-      message: "OTP resent successfully",
+      message: "OTP resent successfully"
     });
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 /* ================= FORGOT PASSWORD ================= */
 
 exports.forgotPassword = async (req, res) => {
   try {
+
     const { email_id } = req.body;
 
     const user = await User.findOne({ email_id });
+
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const otp = generateOtp();
@@ -227,34 +322,42 @@ exports.forgotPassword = async (req, res) => {
 
     user.otp = hashedOtp;
     user.otpExpiry = Date.now() + 5 * 60 * 1000;
-    await user.save();
 
+    await user.save();
     await sendOtp(email_id, otp);
 
-    res.json({ message: "Password reset OTP sent to email" });
+    res.json({
+      success: true,
+      message: "Password reset OTP sent"
+    });
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+
 /* ================= RESET PASSWORD ================= */
 
 exports.resetPassword = async (req, res) => {
   try {
+
     const { email_id, otp, newPassword } = req.body;
 
     const user = await User.findOne({ email_id });
+
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const isValidOtp = await bcrypt.compare(otp, user.otp);
 
-    if (!isValidOtp || user.otpExpiry < Date.now())
+    if (!isValidOtp || user.otpExpiry < Date.now()) {
       return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
 
     if (!validatePassword(newPassword)) {
       return res.status(400).json({
         message:
-          "Password must contain uppercase, lowercase, number, special character and minimum 8 characters",
+          "Password must contain uppercase, lowercase, number, special character and minimum 8 characters"
       });
     }
 
@@ -266,60 +369,11 @@ exports.resetPassword = async (req, res) => {
 
     await user.save();
 
-    res.json({ message: "Password reset successful" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-/* ================= PROFILE ================= */
-
-exports.getProfile = async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id)
-      .select("-password -otp -otpExpiry")
-      .lean();
-
-    const [tasksPosted, tasksCompleted, requestsSent] = await Promise.all([
-      Task.countDocuments({ createdBy: req.user.id }),
-      Task.countDocuments({ createdBy: req.user.id, status: "completed" }),
-      Request.countDocuments({ requestedBy: req.user.id }),
-    ]);
-
     res.json({
-      ...user,
-      stats: {
-        tasksPosted,
-        tasksCompleted,
-        requestsSent,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-/* ================= UPDATE PROFILE PICTURE ================= */
-
-exports.updateProfilePicture = async (req, res) => {
-  try {
-    const { profilePicture } = req.body;
-
-    const uploadResult = await cloudinary.uploader.upload(profilePicture, {
-      folder: "hirehelper/profiles",
-      transformation: [
-        { width: 500, height: 500, crop: "fill" },
-        { quality: "auto" },
-      ],
+      success: true,
+      message: "Password reset successful"
     });
 
-    const user = await User.findByIdAndUpdate(
-      req.user.id,
-      { profilePicture: uploadResult.secure_url },
-      { new: true }
-    ).select("-password -otp -otpExpiry");
-
-    res.json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

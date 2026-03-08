@@ -7,6 +7,7 @@ const {
   verifyOtp,
   login,
   getProfile,
+  updateProfile,          // ✅ ADD THIS LINE
   updateProfilePicture,
   resendOtp,
   forgotPassword,
@@ -16,8 +17,12 @@ const {
 router.post("/register", register);
 router.post("/verify-otp", verifyOtp);
 router.post("/login", login);
+
 router.get("/profile", authMiddleware, getProfile);
+
+router.put("/update-profile", authMiddleware, updateProfile); // ✅ edit profile
 router.put("/profile-picture", authMiddleware, updateProfilePicture);
+
 router.post("/resend-otp", resendOtp);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);

@@ -1,291 +1,290 @@
-import React, { useEffect, useState } from 'react';
-import { getProfile, updateProfilePicture } from '../config/api';
-import { 
-  Camera, 
-  User, 
-  Mail, 
-  Phone, 
-  ShieldCheck, 
-  CheckCircle2, 
-  Loader2,
-  Activity,
-  ListTodo,
-  CheckSquare,
-  Send,
-  UserCircle2,
-  AlertCircle
-} from 'lucide-react';
+import { useEffect, useState } from "react";
+import { getProfile, updateProfile, updateProfilePicture } from "../config/api";
 
-function StatCard({ icon, value, label, iconColorClass = 'text-blue-500', bgClass = 'bg-blue-50' }) {
-  return (
-    <div className="stat-card flex flex-col items-start gap-4 hover:shadow-md transition-shadow duration-200 group">
-      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${bgClass} ${iconColorClass} shadow-sm group-hover:scale-105 transition-transform duration-300`}>
-        {icon}
-      </div>
-      <div>
-        <p className="stat-value">{value}</p>
-        <p className="stat-label mt-1">{label}</p>
-      </div>
-    </div>
-  );
-}
+const Settings = () => {
 
-function InfoRow({ icon, label, value }) {
-  return (
-    <div className="flex items-start md:items-center justify-between py-4 border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors px-2 rounded-lg">
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
-          {icon}
-        </div>
-        <div>
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
-          <p className="text-[15px] font-semibold text-slate-800 mt-0.5">{value || 'Not provided'}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
+  const [profile, setProfile] = useState({});
+  const [editMode, setEditMode] = useState(false);
 
-export default function Settings() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
+  const [form, setForm] = useState({
+    first_name: "",
+    last_name: "",
+    email_id: "",
+    phone_number: ""
+  });
 
-  useEffect(() => { fetchProfile(); }, []);
+  const [photo, setPhoto] = useState(null);
 
-  const fetchProfile = async () => {
+
+  /* ================= LOAD PROFILE ================= */
+
+  const loadProfile = async () => {
     try {
-      const { data } = await getProfile();
-      setUser(data);
-    } catch (error) {
-      console.error('Failed to fetch profile:', error);
-    } finally {
-      setLoading(false);
+      const res = await getProfile();
+
+      setProfile(res.data);
+
+      setForm({
+        first_name: res.data.first_name || "",
+        last_name: res.data.last_name || "",
+        email_id: res.data.email_id || "",
+        phone_number: res.data.phone_number || ""
+      });
+
+    } catch (err) {
+      console.log(err);
     }
   };
 
-  const handleImageUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image must be smaller than 5MB');
-      return;
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+
+  /* ================= INPUT CHANGE ================= */
+
+  const handleChange = (e) => {
+
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value
+    });
+
+  };
+
+
+  /* ================= SAVE PROFILE ================= */
+
+  const handleSave = async () => {
+
+    try {
+
+      const res = await updateProfile(form);
+
+      setProfile(res.data.user);
+
+      setEditMode(false);
+
+    } catch (err) {
+
+      console.log(err);
+
     }
-    setUploading(true);
+
+  };
+
+
+  /* ================= PROFILE PHOTO ================= */
+
+  const handlePhotoUpload = async (e) => {
+
+    const file = e.target.files[0];
+
     const reader = new FileReader();
-    reader.onloadend = async () => {
-      try {
-        const img = new Image();
-        img.src = reader.result;
-        img.onload = async () => {
-          const canvas = document.createElement('canvas');
-          const MAX = 800;
-          let { width, height } = img;
-          if (width > height && width > MAX) { height *= MAX / width; width = MAX; }
-          if (height >= width && height > MAX) { width *= MAX / height; height = MAX; }
-          canvas.width = width;
-          canvas.height = height;
-          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-          const compressed = canvas.toDataURL('image/jpeg', 0.7);
-          try {
-            const { data } = await updateProfilePicture({ profilePicture: compressed });
-            setUser(data);
-          } catch (err) {
-            console.error('Upload failed:', err);
-            alert('Failed to upload image.');
-          } finally {
-            setUploading(false);
-          }
-        };
-      } catch {
-        alert('Failed to process image.');
-        setUploading(false);
-      }
-    };
+
     reader.readAsDataURL(file);
+
+    reader.onloadend = async () => {
+
+      try {
+
+        await updateProfilePicture({
+          profilePicture: reader.result
+        });
+
+        loadProfile();
+
+      } catch (err) {
+
+        console.log(err);
+
+      }
+
+    };
+
   };
 
-  if (loading) {
-    return (
-      <div className="max-w-4xl mx-auto space-y-6 pb-12">
-        <div className="surface-card p-8 flex items-center gap-6">
-          <div className="skeleton w-24 h-24 rounded-2xl" />
-          <div className="flex-1 space-y-3">
-            <div className="skeleton h-6 w-1/3 rounded-md" />
-            <div className="skeleton h-4 w-1/4 rounded-sm" />
-            <div className="skeleton h-8 w-32 rounded-lg mt-4" />
-          </div>
-        </div>
-        <div className="surface-card p-8 space-y-4">
-          <div className="skeleton h-5 w-1/4 rounded-md mb-6" />
-          <div className="skeleton h-12 w-full rounded-lg" />
-          <div className="skeleton h-12 w-full rounded-lg" />
-          <div className="skeleton h-12 w-full rounded-lg" />
-        </div>
-      </div>
-    );
-  }
-
-  const initials = `${user?.first_name?.[0] || ''}${user?.last_name?.[0] || ''}`.toUpperCase();
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-12">
 
-      {/* ── Page Header ──────────────────────────────────────── */}
-      <div>
-        <h2 className="section-head">Account Settings</h2>
-        <p className="section-sub mt-1 max-w-xl">Manage your personal profile, update your photo, and view your activity summary.</p>
+    <div className="p-8 max-w-5xl mx-auto">
+
+      <h1 className="text-3xl font-bold mb-2">Account Settings</h1>
+
+      <p className="text-gray-500 mb-8">
+        Manage your personal profile, update your photo, and view your activity summary.
+      </p>
+
+
+      {/* ================= PROFILE CARD ================= */}
+
+      <div className="bg-white shadow rounded-xl p-6 mb-8">
+
+        <div className="flex items-center gap-6">
+
+          <div className="relative">
+
+            <img
+              src={
+                profile.profilePicture ||
+                "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+              }
+              className="w-24 h-24 rounded-xl object-cover"
+            />
+
+            <input
+              type="file"
+              onChange={handlePhotoUpload}
+              className="absolute bottom-0 right-0 opacity-0 w-full h-full cursor-pointer"
+            />
+
+          </div>
+
+
+          <div>
+
+            <h2 className="text-xl font-semibold">
+              {profile.first_name} {profile.last_name}
+            </h2>
+
+            <p className="text-gray-500">{profile.email_id}</p>
+
+            <div className="flex gap-3 mt-2">
+
+              <span className="bg-green-100 text-green-600 text-sm px-3 py-1 rounded-full">
+                Verified Account
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
       </div>
 
-      {/* ── Profile Identity ─────────────────────────────────── */}
-      <div className="surface-card p-6 md:p-8">
-        <h3 className="section-label">Profile Card</h3>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 md:gap-8 bg-slate-50/50 rounded-2xl p-6 border border-slate-100 shadow-inner">
 
-          {/* Avatar */}
-          <div className="relative flex-shrink-0 group cursor-pointer">
-            {user?.profilePicture ? (
-              <img
-                src={user.profilePicture}
-                alt="Profile"
-                className="w-28 h-28 rounded-2xl object-cover border-4 border-white shadow-md group-hover:shadow-lg transition-transform duration-300 group-hover:scale-[1.02]"
-              />
-            ) : (
-              <div className="w-28 h-28 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white text-3xl font-black tracking-wide border-4 border-white shadow-md group-hover:shadow-lg transition-transform duration-300 group-hover:scale-[1.02]">
-                {initials || <UserCircle2 className="w-12 h-12 text-white/80" />}
-              </div>
-            )}
-            
-            {/* Upload Overlay */}
-            <label
-              htmlFor="avatar-upload"
-              className="absolute -bottom-2 -right-2 w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center cursor-pointer shadow-md hover:bg-slate-50 hover:border-blue-400 hover:text-blue-600 transition-all duration-200 z-10"
-              title="Change photo"
-            >
-              <Camera className="w-5 h-5 text-slate-500 hover:text-blue-600 transition-colors" />
-              <input
-                id="avatar-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                disabled={uploading}
-                className="sr-only"
-              />
+      {/* ================= PERSONAL INFO ================= */}
+
+      <div className="bg-white shadow rounded-xl p-6">
+
+        <div className="flex justify-between mb-6">
+
+          <h2 className="text-xl font-semibold">
+            Personal Information
+          </h2>
+
+          <button
+            onClick={() => setEditMode(!editMode)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+          >
+            {editMode ? "Cancel" : "Edit Profile"}
+          </button>
+
+        </div>
+
+
+        <div className="grid grid-cols-2 gap-6">
+
+          {/* FIRST NAME */}
+
+          <div>
+
+            <label className="text-gray-500 text-sm">
+              First Name
             </label>
+
+            <input
+              type="text"
+              name="first_name"
+              value={form.first_name}
+              disabled={!editMode}
+              onChange={handleChange}
+              className="w-full border rounded-lg p-3 mt-1"
+            />
+
           </div>
 
-          {/* Info */}
-          <div className="flex-1 min-w-0">
-            <h3 className="page-title text-2xl">
-              {user?.first_name} {user?.last_name}
-            </h3>
-            <p className="text-[15px] font-medium text-slate-500 mt-1">{user?.email_id}</p>
 
-            <div className="flex items-center flex-wrap gap-3 mt-4">
-              {/* Verification badge */}
-              <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-bold uppercase tracking-wide shadow-sm
-                ${user?.isVerified 
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-emerald-100' 
-                  : 'bg-amber-50 text-amber-700 border-amber-200 shadow-amber-100'}`}>
-                {user?.isVerified ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                ) : (
-                  <AlertCircle className="w-4 h-4 text-amber-600" />
-                )}
-                {user?.isVerified ? 'Verified Account' : 'Action Required'}
-              </div>
+          {/* LAST NAME */}
 
-              {/* Upload button */}
-              <label
-                htmlFor="avatar-upload-2"
-                className="btn-secondary px-4 py-1.5 shadow-sm"
-              >
-                {uploading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <Camera className="w-4 h-4 text-slate-500" />
-                    Change Photo
-                  </>
-                )}
-                <input
-                  id="avatar-upload-2"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  disabled={uploading}
-                  className="sr-only"
-                />
-              </label>
-            </div>
+          <div>
+
+            <label className="text-gray-500 text-sm">
+              Last Name
+            </label>
+
+            <input
+              type="text"
+              name="last_name"
+              value={form.last_name}
+              disabled={!editMode}
+              onChange={handleChange}
+              className="w-full border rounded-lg p-3 mt-1"
+            />
+
           </div>
+
+
+          {/* EMAIL */}
+
+          <div>
+
+            <label className="text-gray-500 text-sm">
+              Email Address
+            </label>
+
+            <input
+              type="email"
+              name="email_id"
+              value={form.email_id}
+              disabled={!editMode}
+              onChange={handleChange}
+              className="w-full border rounded-lg p-3 mt-1"
+            />
+
+          </div>
+
+
+          {/* PHONE */}
+
+          <div>
+
+            <label className="text-gray-500 text-sm">
+              Phone Number
+            </label>
+
+            <input
+              type="text"
+              name="phone_number"
+              value={form.phone_number}
+              disabled={!editMode}
+              onChange={handleChange}
+              className="w-full border rounded-lg p-3 mt-1"
+            />
+
+          </div>
+
         </div>
+
+
+        {editMode && (
+
+          <button
+            onClick={handleSave}
+            className="mt-6 bg-green-600 text-white px-6 py-2 rounded-lg"
+          >
+            Save Changes
+          </button>
+
+        )}
+
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* ── Profile Information ───────────────────────────────── */}
-        <div className="lg:col-span-12">
-          <div className="surface-card overflow-hidden">
-            <div className="px-6 md:px-8 py-5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 shadow-inner">
-                <User className="w-4 h-4" />
-              </div>
-              <h3 className="text-[15px] font-bold text-slate-900 tracking-tight">Personal Information</h3>
-            </div>
-
-            <div className="p-4 md:p-6 lg:p-8 bg-white grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-2">
-              <InfoRow icon={<User className="w-4 h-4" />} label="First Name" value={user?.first_name} />
-              <InfoRow icon={<User className="w-4 h-4" />} label="Last Name" value={user?.last_name} />
-              <InfoRow icon={<Mail className="w-4 h-4" />} label="Email Address" value={user?.email_id} />
-              <InfoRow icon={<Phone className="w-4 h-4" />} label="Phone Number" value={user?.phone_number} />
-              <div className="md:col-span-2">
-                <InfoRow 
-                  icon={<ShieldCheck className={`w-4 h-4 ${user?.isVerified ? 'text-emerald-500' : 'text-amber-500'}`} />} 
-                  label="Account Status" 
-                  value={user?.isVerified ? 'Verified' : 'Pending Verification'} 
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Activity Summary ─────────────────────────────────── */}
-        <div className="lg:col-span-12">
-          <div className="flex items-center gap-3 mb-5 px-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 shadow-inner">
-              <Activity className="w-4 h-4" />
-            </div>
-            <h3 className="page-title">Activity Summary</h3>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <StatCard 
-              icon={<ListTodo className="w-6 h-6" />} 
-              value={user?.stats?.tasksPosted || 0} 
-              label="Tasks Posted" 
-              iconColorClass="text-blue-600" 
-              bgClass="bg-blue-50"
-            />
-            <StatCard 
-              icon={<CheckSquare className="w-6 h-6" />} 
-              value={user?.stats?.tasksCompleted || 0} 
-              label="Tasks Completed" 
-              iconColorClass="text-emerald-600" 
-              bgClass="bg-emerald-50"
-            />
-            <StatCard 
-              icon={<Send className="w-6 h-6" />} 
-              value={user?.stats?.requestsSent || 0} 
-              label="Requests Sent" 
-              iconColorClass="text-indigo-600" 
-              bgClass="bg-indigo-50"
-            />
-          </div>
-        </div>
-      </div>
     </div>
+
   );
-}
+
+};
+
+export default Settings;

@@ -1,9 +1,13 @@
 const Task = require("../Models/Task");
 const cloudinary = require("../config/cloudinary");
 
-// CREATE TASK
+/* ===================================== */
+/*            CREATE TASK                */
+/* ===================================== */
+
 exports.createTask = async (req, res) => {
   try {
+
     const {
       title,
       description,
@@ -55,17 +59,25 @@ exports.createTask = async (req, res) => {
       message: "Task created successfully",
       task,
     });
+
   } catch (error) {
+
     res.status(500).json({
       success: false,
       message: error.message,
     });
+
   }
 };
 
-// GET MY TASKS
+
+/* ===================================== */
+/*            GET MY TASKS               */
+/* ===================================== */
+
 exports.getMyTasks = async (req, res) => {
   try {
+
     const tasks = await Task.find({
       createdBy: req.user.id,
     })
@@ -76,17 +88,25 @@ exports.getMyTasks = async (req, res) => {
       success: true,
       tasks,
     });
+
   } catch (error) {
+
     res.status(500).json({
       success: false,
       message: error.message,
     });
+
   }
 };
 
-// FEED TASKS
+
+/* ===================================== */
+/*            FEED TASKS                 */
+/* ===================================== */
+
 exports.getFeedTasks = async (req, res) => {
   try {
+
     const tasks = await Task.find({
       createdBy: { $ne: req.user.id },
       status: "open",
@@ -102,17 +122,25 @@ exports.getFeedTasks = async (req, res) => {
       success: true,
       tasks,
     });
+
   } catch (error) {
+
     res.status(500).json({
       success: false,
       message: error.message,
     });
+
   }
 };
 
-// GET TASK BY ID
+
+/* ===================================== */
+/*            GET TASK BY ID             */
+/* ===================================== */
+
 exports.getTaskById = async (req, res) => {
   try {
+
     const task = await Task.findById(req.params.id)
       .populate("createdBy", "first_name last_name profilePicture")
       .lean();
@@ -128,17 +156,25 @@ exports.getTaskById = async (req, res) => {
       success: true,
       task,
     });
+
   } catch (error) {
+
     res.status(500).json({
       success: false,
       message: error.message,
     });
+
   }
 };
 
-// GET ASSIGNED TASKS
+
+/* ===================================== */
+/*            GET ASSIGNED TASKS         */
+/* ===================================== */
+
 exports.getAssignedTasks = async (req, res) => {
   try {
+
     const tasks = await Task.find({
       assignedTo: req.user.id,
     })
@@ -150,23 +186,25 @@ exports.getAssignedTasks = async (req, res) => {
       success: true,
       tasks,
     });
+
   } catch (error) {
+
     res.status(500).json({
       success: false,
       message: error.message,
     });
+
   }
 };
 
 
-
-
 /* ===================================== */
-/*            EDIT TASK                  */
+/*            UPDATE TASK                */
 /* ===================================== */
 
 exports.updateTask = async (req, res) => {
   try {
+
     const taskId = req.params.id;
 
     const task = await Task.findById(taskId);
@@ -200,12 +238,15 @@ exports.updateTask = async (req, res) => {
 
     let imageUrl = task.picture;
 
-    if (picture) {
+    /* Upload new image ONLY if base64 */
+    if (picture && picture.startsWith("data:image")) {
+
       const uploadResult = await cloudinary.uploader.upload(picture, {
         folder: "hirehelper/tasks",
       });
 
       imageUrl = uploadResult.secure_url;
+
     }
 
     const updatedTask = await Task.findByIdAndUpdate(
@@ -221,7 +262,7 @@ exports.updateTask = async (req, res) => {
         endTime,
         picture: imageUrl,
       },
-      { new: true }
+      { returnDocument: "after" }
     );
 
     res.json({
@@ -231,13 +272,14 @@ exports.updateTask = async (req, res) => {
     });
 
   } catch (error) {
+
     res.status(500).json({
       success: false,
       message: error.message,
     });
+
   }
 };
-
 
 
 /* ===================================== */
@@ -274,9 +316,11 @@ exports.deleteTask = async (req, res) => {
     });
 
   } catch (error) {
+
     res.status(500).json({
       success: false,
       message: error.message,
     });
+
   }
 };
