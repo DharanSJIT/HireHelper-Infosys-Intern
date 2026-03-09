@@ -1,6 +1,7 @@
 const Task = require("../Models/Task");
 const cloudinary = require("../config/cloudinary");
 
+
 /* ===================================== */
 /*            CREATE TASK                */
 /* ===================================== */
@@ -30,6 +31,7 @@ exports.createTask = async (req, res) => {
     let imageUrl = "";
 
     if (picture) {
+
       const uploadResult = await cloudinary.uploader.upload(picture, {
         folder: "hirehelper/tasks",
         transformation: [
@@ -39,6 +41,7 @@ exports.createTask = async (req, res) => {
       });
 
       imageUrl = uploadResult.secure_url;
+
     }
 
     const task = await Task.create({
@@ -111,10 +114,7 @@ exports.getFeedTasks = async (req, res) => {
       createdBy: { $ne: req.user.id },
       status: "open",
     })
-      .populate({
-        path: "createdBy",
-        select: "first_name last_name profilePicture",
-      })
+      .populate("createdBy", "first_name last_name profilePicture")
       .sort({ createdAt: -1 })
       .lean();
 
@@ -216,7 +216,8 @@ exports.updateTask = async (req, res) => {
       });
     }
 
-    // Only creator can edit
+    /* Only creator can update */
+
     if (task.createdBy.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,
@@ -238,7 +239,8 @@ exports.updateTask = async (req, res) => {
 
     let imageUrl = task.picture;
 
-    /* Upload new image ONLY if base64 */
+    /* Upload new image if provided */
+
     if (picture && picture.startsWith("data:image")) {
 
       const uploadResult = await cloudinary.uploader.upload(picture, {
@@ -262,7 +264,7 @@ exports.updateTask = async (req, res) => {
         endTime,
         picture: imageUrl,
       },
-      { returnDocument: "after" }
+      { new: true }
     );
 
     res.json({
@@ -300,7 +302,8 @@ exports.deleteTask = async (req, res) => {
       });
     }
 
-    // Only creator can delete
+    /* Only creator can delete */
+
     if (task.createdBy.toString() !== req.user.id) {
       return res.status(403).json({
         success: false,

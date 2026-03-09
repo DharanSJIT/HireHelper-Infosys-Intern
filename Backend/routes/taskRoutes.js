@@ -1,52 +1,53 @@
 const express = require("express");
+
 const router = express.Router();
 
-const authMiddleware = require("../middlewares/authMiddlewares");
+const auth = require("../middlewares/authMiddlewares");
 
 const {
   createTask,
   getMyTasks,
   getFeedTasks,
-  getTaskById,
   getAssignedTasks,
+  getTaskById,
   updateTask,
-  deleteTask,
-} = require("../Controllers/taskController");
+  deleteTask
+} = require("../controllers/taskController");
 
 
 /* ================= CREATE TASK ================= */
 
-router.post("/create", authMiddleware, createTask);
+router.post("/create", auth, createTask);
 
 
-/* ================= MY TASKS ================= */
+/* ================= GET MY TASKS ================= */
 
-router.get("/my-tasks", authMiddleware, getMyTasks);
+router.get("/my-tasks", auth, getMyTasks);
 
 
 /* ================= FEED TASKS ================= */
 
-router.get("/feed", authMiddleware, getFeedTasks);
+router.get("/feed", auth, getFeedTasks);
 
 
 /* ================= ASSIGNED TASKS ================= */
 
-router.get("/assigned", authMiddleware, getAssignedTasks);
-
-
-/* ================= UPDATE TASK ================= */
-
-router.put("/:id", authMiddleware, updateTask);
-
-
-/* ================= DELETE TASK ================= */
-
-router.delete("/:id", authMiddleware, deleteTask);
+router.get("/assigned", auth, getAssignedTasks);
 
 
 /* ================= GET TASK BY ID ================= */
 
-router.get("/:id", authMiddleware, getTaskById);
+router.get("/:id", auth, getTaskById);
+
+
+/* ================= UPDATE TASK ================= */
+
+router.put("/edit/:id", auth, updateTask);
+
+
+/* ================= DELETE TASK ================= */
+
+router.delete("/delete/:id", auth, deleteTask);
 
 
 module.exports = router;
