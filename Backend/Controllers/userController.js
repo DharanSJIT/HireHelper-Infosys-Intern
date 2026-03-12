@@ -1,24 +1,123 @@
-const User = require("../Models/User");
+const User = require("../models/User");
+const Task = require("../models/Task");
+const Request = require("../models/Request");
+
+/* ================= UPDATE PROFILE PICTURE ================= */
 
 exports.updateProfilePicture = async (req, res) => {
   try {
-    const userId = req.user.id; // from JWT middleware
 
-    if (!req.file)
-      return res.status(400).json({ message: "No image uploaded" });
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No image uploaded",
+      });
+    }
 
-    const user = await User.findById(userId);
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      { profilePicture: req.file.path },
+      { new: true }
+    ).select("profilePicture");
 
-    user.profilePicture = req.file.path; // Cloudinary URL
-    await user.save();
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
 
     res.json({
       success: true,
-      message: "Profile picture updated",
-      profilePicture: user.profilePicture
+      message: "Profile picture updated successfully",
+      profilePicture: updatedUser.profilePicture,
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Update Profile Picture Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to update profile picture",
+    });
+  }
+};
+
+
+/* ================= UPDATE PROFILE ================= */
+
+exports.updateProfile = async (req, res) => {
+  try {
+
+    const { first_name, last_name, phone_number } = req.body;
+
+    const updates = {};
+
+    if (first_name) updates.first_name = first_name;
+    if (last_name) updates.last_name = last_name;
+    if (phone_number) updates.phone_number = phone_number;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      updates,
+      { new: true }
+    ).select("-password -otp -otpExpiry");
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      user: updatedUser
+    });
+
+  } catch (error) {
+    console.error("Update Profile Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to update profile",
+    });
+  }
+};
+
+
+/* ================= GET PROFILE ================= */
+
+exports.getProfile = async (req, res) => {
+  try {
+
+    const user = await User.findById(req.user.id)
+      .select("-password -otp -otpExpiry")
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    const [tasksPosted, tasksCompleted, requestsSent] = await Promise.all([
+      Task.countDocuments({ createdBy: req.user.id }),
+      Task.countDocuments({ createdBy: req.user.id, status: "completed" }),
+      Request.countDocuments({ requestedBy: req.user.id })
+    ]);
+
+    res.json({
+      success: true,
+      user,
+      stats: {
+        tasksPosted,
+        tasksCompleted,
+        requestsSent
+      }
+    });
+
+  } catch (error) {
+    console.error("Get Profile Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch profile",
+    });
   }
 };

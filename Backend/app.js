@@ -3,8 +3,9 @@
     const cors = require("cors");
     const connectDB = require("./config/connectDB");
     const authRoutes = require("./routes/authRoutes.js");
+    const userRoutes = require("./routes/userRoutes"); 
     const taskRoutes = require("./routes/taskRoutes.js");
-    const authMiddleware = require("./middlewares/authMiddlewares.js");
+    const authMiddleware = require("./middlewares/authMiddleware.js");
     const requestRoutes = require("./routes/requestRoutes.js");
 
     const app = express();
@@ -16,6 +17,7 @@
     app.use("/api/auth",authRoutes);
     app.use("/api/tasks",taskRoutes);
     app.use("/api/requests",requestRoutes);
+    app.use("/api/users", userRoutes);
 
     app.get("/api/dashboard",authMiddleware,(req,res)=>{
         res.json({ message: "Welcome to Dashboard" });

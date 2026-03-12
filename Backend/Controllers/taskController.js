@@ -1,4 +1,4 @@
-const Task = require("../Models/Task");
+const Task = require("../models/Task");
 const cloudinary = require("../config/cloudinary");
 
 

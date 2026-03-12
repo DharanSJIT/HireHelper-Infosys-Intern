@@ -1,26 +1,6 @@
-const Request = require("../Models/Request");
-const Task = require("../Models/Task");
-const Notification = require("../Models/Notification");
-
-const createNotification = async ({
-  recipient,
-  actor = null,
-  task = null,
-  request = null,
-  type,
-  title,
-  message,
-}) => {
-  await Notification.create({
-    recipient,
-    actor,
-    task,
-    request,
-    type,
-    title,
-    message,
-  });
-};
+const Request = require("../models/Request");
+const Task = require("../models/Task");
+const Notification = require("../models/Notification");
 
 exports.requestTask = async (req, res) => {
   try {
