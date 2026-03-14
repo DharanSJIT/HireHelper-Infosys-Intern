@@ -25,7 +25,12 @@ exports.getNotifications = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
   }
 };
 
@@ -38,7 +43,7 @@ exports.markNotificationRead = async (req, res) => {
     const notification = await Notification.findOneAndUpdate(
       { _id: req.params.notificationId, recipient: req.user.id },
       { isRead: true, readAt: new Date() },
-      { new: true }
+      { returnDocument: "after" }
     );
 
     if (!notification) {
@@ -54,7 +59,12 @@ exports.markNotificationRead = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
   }
 };
 
@@ -75,6 +85,11 @@ exports.markAllNotificationsRead = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
   }
 };

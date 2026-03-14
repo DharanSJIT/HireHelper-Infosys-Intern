@@ -8,8 +8,14 @@ exports.createNotification = async ({
   type,
   title,
   message,
+  io,
+  onlineUsers
 }) => {
+
   try {
+
+    if (recipient.toString() === actor?.toString()) return;
+
     const notification = await Notification.create({
       recipient,
       actor,
@@ -17,11 +23,21 @@ exports.createNotification = async ({
       request,
       type,
       title,
-      message,
+      message
     });
 
+    const socketId = onlineUsers.get(recipient.toString());
+
+    if (socketId) {
+      io.to(socketId).emit("new_notification", notification);
+    }
+
     return notification;
+
   } catch (error) {
-    console.error("Notification Error:", error);
+
+    console.error("Notification error:", error);
+
   }
+
 };
