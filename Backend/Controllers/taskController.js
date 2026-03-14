@@ -31,7 +31,6 @@ exports.createTask = async (req, res) => {
     let imageUrl = "";
 
     if (picture) {
-
       const uploadResult = await cloudinary.uploader.upload(picture, {
         folder: "hirehelper/tasks",
         transformation: [
