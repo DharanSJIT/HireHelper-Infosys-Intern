@@ -5,7 +5,6 @@ import axios from "axios";
 ===================================================== */
 
 const addToken = (config) => {
-
   const token = localStorage.getItem("token");
 
   if (token) {
@@ -15,110 +14,101 @@ const addToken = (config) => {
   return config;
 };
 
+/* =====================================================
+   BASE API
+===================================================== */
+
+const BASE_API = axios.create({
+  baseURL: "http://localhost:3000/api",
+});
+
+BASE_API.interceptors.request.use(addToken);
 
 /* =====================================================
    AUTH API
 ===================================================== */
 
-const API = axios.create({
-  baseURL: "http://localhost:3000/api/auth",
-});
-
-API.interceptors.request.use(addToken);
-
-
-/* ================= AUTH FUNCTIONS ================= */
-
 export const register = (data) =>
-  API.post("/register", data);
+  BASE_API.post("/auth/register", data);
 
 export const verifyOtp = (data) =>
-  API.post("/verify-otp", data);
+  BASE_API.post("/auth/verify-otp", data);
 
 export const resendOtp = (data) =>
-  API.post("/resend-otp", data);
+  BASE_API.post("/auth/resend-otp", data);
 
 export const login = (data) =>
-  API.post("/login", data);
-
-export const getProfile = () =>
-  API.get("/profile");
-
-export const updateProfile = (data) =>
-  API.put("/update-profile", data);
-
-export const updateProfilePicture = (data) =>
-  API.put("/profile-picture", data);
+  BASE_API.post("/auth/login", data);
 
 export const forgotPassword = (data) =>
-  API.post("/forgot-password", data);
+  BASE_API.post("/auth/forgot-password", data);
 
 export const resetPassword = (data) =>
-  API.post("/reset-password", data);
+  BASE_API.post("/auth/reset-password", data);
+
+
+/* =====================================================
+   USER API
+===================================================== */
+
+export const getProfile = () =>
+  BASE_API.get("/users/profile");
+
+export const updateProfile = (data) =>
+  BASE_API.put("/users/update-profile", data);
+
+export const updateProfilePicture = (data) =>
+  BASE_API.put("/users/profile-picture", data,{
+    headers: {
+      "Content-Type": "multipart/form-data"
+    }
+  });
 
 
 /* =====================================================
    TASK API
 ===================================================== */
 
-const TaskAPI = axios.create({
-  baseURL: "http://localhost:3000/api/tasks",
-});
-
-TaskAPI.interceptors.request.use(addToken);
-
-
-/* ================= TASK FUNCTIONS ================= */
-
 export const createTask = (data) =>
-  TaskAPI.post("/create", data);
+  BASE_API.post("/tasks/create", data);
 
 export const getMyTasks = () =>
-  TaskAPI.get("/my-tasks");
+  BASE_API.get("/tasks/my-tasks");
 
 export const getFeedTasks = () =>
-  TaskAPI.get("/feed");
+  BASE_API.get("/tasks/feed");
 
 export const getAssignedTasks = () =>
-  TaskAPI.get("/assigned");
+  BASE_API.get("/tasks/assigned");
 
 export const getTaskById = (id) =>
-  TaskAPI.get(`/${id}`);
+  BASE_API.get(`/tasks/${id}`);
 
 export const updateTask = (id, data) =>
-  TaskAPI.put(`/edit/${id}`, data);
+  BASE_API.put(`/tasks/edit/${id}`, data);
 
 export const deleteTask = (id) =>
-  TaskAPI.delete(`/delete/${id}`);
+  BASE_API.delete(`/tasks/delete/${id}`);
 
 
 /* =====================================================
    REQUEST API
 ===================================================== */
 
-const RequestAPI = axios.create({
-  baseURL: "http://localhost:3000/api/requests",
-});
-
-RequestAPI.interceptors.request.use(addToken);
-
-
-/* ================= REQUEST FUNCTIONS ================= */
-
 export const requestTask = (taskId) =>
-  RequestAPI.post(`/${taskId}`);
+  BASE_API.post(`/requests/${taskId}`);
 
 export const getRequestsForMyTasks = () =>
-  RequestAPI.get("/my-tasks");
+  BASE_API.get("/requests/my-tasks");
 
 export const getMyRequests = () =>
-  RequestAPI.get("/my-requests");
+  BASE_API.get("/requests/my-requests");
 
 export const acceptRequest = (requestId) =>
-  RequestAPI.patch(`/${requestId}/accept`);
+  BASE_API.patch(`/requests/${requestId}/accept`);
 
 export const rejectRequest = (requestId) =>
-  RequestAPI.patch(`/${requestId}/reject`);
+  BASE_API.patch(`/requests/${requestId}/reject`);
 
 
 /* =====================================================
@@ -126,17 +116,17 @@ export const rejectRequest = (requestId) =>
 ===================================================== */
 
 export const getNotifications = () =>
-  RequestAPI.get("/notifications");
+  BASE_API.get("/notifications");
 
 export const markNotificationRead = (notificationId) =>
-  RequestAPI.patch(`/notifications/${notificationId}/read`);
+  BASE_API.patch(`/notifications/${notificationId}/read`);
 
 export const markAllNotificationsRead = () =>
-  RequestAPI.patch("/notifications/read-all");
+  BASE_API.patch("/notifications/read-all");
 
 
 /* =====================================================
-   EXPORT DEFAULT
+   EXPORT
 ===================================================== */
 
-export default API;
+export default BASE_API;

@@ -6,6 +6,7 @@ const Request = require("../models/Request");
 
 exports.updateProfilePicture = async (req, res) => {
   try {
+    console.log(req.file);
 
     if (!req.file) {
       return res.status(400).json({
@@ -17,7 +18,7 @@ exports.updateProfilePicture = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
       { profilePicture: req.file.path },
-      { new: true }
+      { returnDocument: "after" }
     ).select("profilePicture");
 
     if (!updatedUser) {
@@ -60,7 +61,7 @@ exports.updateProfile = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
       updates,
-      { new: true }
+      { returnDocument: "after" }
     ).select("-password -otp -otpExpiry");
 
     res.json({

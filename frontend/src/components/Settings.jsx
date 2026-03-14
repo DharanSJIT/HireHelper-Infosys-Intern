@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { getProfile, updateProfile, updateProfilePicture } from "../config/api";
 
 const Settings = () => {
-
   const [profile, setProfile] = useState({});
   const [editMode, setEditMode] = useState(false);
 
@@ -10,11 +9,10 @@ const Settings = () => {
     first_name: "",
     last_name: "",
     email_id: "",
-    phone_number: ""
+    phone_number: "",
   });
 
   const [photo, setPhoto] = useState(null);
-
 
   /* ================= LOAD PROFILE ================= */
 
@@ -22,15 +20,14 @@ const Settings = () => {
     try {
       const res = await getProfile();
 
-      setProfile(res.data);
+      setProfile(res.data.user);
 
       setForm({
-        first_name: res.data.first_name || "",
-        last_name: res.data.last_name || "",
-        email_id: res.data.email_id || "",
-        phone_number: res.data.phone_number || ""
+        first_name: res.data.user.first_name || "",
+        last_name: res.data.user.last_name || "",
+        email_id: res.data.user.email_id || "",
+        phone_number: res.data.user.phone_number || "",
       });
-
     } catch (err) {
       console.log(err);
     }
@@ -40,90 +37,65 @@ const Settings = () => {
     loadProfile();
   }, []);
 
-
   /* ================= INPUT CHANGE ================= */
 
   const handleChange = (e) => {
-
     setForm({
       ...form,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
-
   };
-
 
   /* ================= SAVE PROFILE ================= */
 
   const handleSave = async () => {
-
     try {
-
       const res = await updateProfile(form);
 
       setProfile(res.data.user);
 
       setEditMode(false);
-
     } catch (err) {
-
       console.log(err);
-
     }
-
   };
-
 
   /* ================= PROFILE PHOTO ================= */
 
   const handlePhotoUpload = async (e) => {
-
     const file = e.target.files[0];
 
-    const reader = new FileReader();
+    const formData = new FormData();
+    formData.append("profilePicture", file);
 
-    reader.readAsDataURL(file);
+     try {
 
-    reader.onloadend = async () => {
+    await updateProfilePicture(formData);
 
-      try {
+    loadProfile();
 
-        await updateProfilePicture({
-          profilePicture: reader.result
-        });
+  } catch (err) {
 
-        loadProfile();
+    console.log(err);
 
-      } catch (err) {
-
-        console.log(err);
-
-      }
-
-    };
+  }
 
   };
 
-
   return (
-
     <div className="p-8 max-w-5xl mx-auto">
-
       <h1 className="text-3xl font-bold mb-2">Account Settings</h1>
 
       <p className="text-gray-500 mb-8">
-        Manage your personal profile, update your photo, and view your activity summary.
+        Manage your personal profile, update your photo, and view your activity
+        summary.
       </p>
-
 
       {/* ================= PROFILE CARD ================= */}
 
       <div className="bg-white shadow rounded-xl p-6 mb-8">
-
         <div className="flex items-center gap-6">
-
           <div className="relative">
-
             <img
               src={
                 profile.profilePicture ||
@@ -137,12 +109,9 @@ const Settings = () => {
               onChange={handlePhotoUpload}
               className="absolute bottom-0 right-0 opacity-0 w-full h-full cursor-pointer"
             />
-
           </div>
 
-
           <div>
-
             <h2 className="text-xl font-semibold">
               {profile.first_name} {profile.last_name}
             </h2>
@@ -150,29 +119,19 @@ const Settings = () => {
             <p className="text-gray-500">{profile.email_id}</p>
 
             <div className="flex gap-3 mt-2">
-
               <span className="bg-green-100 text-green-600 text-sm px-3 py-1 rounded-full">
                 Verified Account
               </span>
-
             </div>
-
           </div>
-
         </div>
-
       </div>
-
 
       {/* ================= PERSONAL INFO ================= */}
 
       <div className="bg-white shadow rounded-xl p-6">
-
         <div className="flex justify-between mb-6">
-
-          <h2 className="text-xl font-semibold">
-            Personal Information
-          </h2>
+          <h2 className="text-xl font-semibold">Personal Information</h2>
 
           <button
             onClick={() => setEditMode(!editMode)}
@@ -180,19 +139,13 @@ const Settings = () => {
           >
             {editMode ? "Cancel" : "Edit Profile"}
           </button>
-
         </div>
 
-
         <div className="grid grid-cols-2 gap-6">
-
           {/* FIRST NAME */}
 
           <div>
-
-            <label className="text-gray-500 text-sm">
-              First Name
-            </label>
+            <label className="text-gray-500 text-sm">First Name</label>
 
             <input
               type="text"
@@ -202,17 +155,12 @@ const Settings = () => {
               onChange={handleChange}
               className="w-full border rounded-lg p-3 mt-1"
             />
-
           </div>
-
 
           {/* LAST NAME */}
 
           <div>
-
-            <label className="text-gray-500 text-sm">
-              Last Name
-            </label>
+            <label className="text-gray-500 text-sm">Last Name</label>
 
             <input
               type="text"
@@ -222,17 +170,12 @@ const Settings = () => {
               onChange={handleChange}
               className="w-full border rounded-lg p-3 mt-1"
             />
-
           </div>
-
 
           {/* EMAIL */}
 
           <div>
-
-            <label className="text-gray-500 text-sm">
-              Email Address
-            </label>
+            <label className="text-gray-500 text-sm">Email Address</label>
 
             <input
               type="email"
@@ -242,17 +185,12 @@ const Settings = () => {
               onChange={handleChange}
               className="w-full border rounded-lg p-3 mt-1"
             />
-
           </div>
-
 
           {/* PHONE */}
 
           <div>
-
-            <label className="text-gray-500 text-sm">
-              Phone Number
-            </label>
+            <label className="text-gray-500 text-sm">Phone Number</label>
 
             <input
               type="text"
@@ -262,29 +200,20 @@ const Settings = () => {
               onChange={handleChange}
               className="w-full border rounded-lg p-3 mt-1"
             />
-
           </div>
-
         </div>
 
-
         {editMode && (
-
           <button
             onClick={handleSave}
             className="mt-6 bg-green-600 text-white px-6 py-2 rounded-lg"
           >
             Save Changes
           </button>
-
         )}
-
       </div>
-
     </div>
-
   );
-
 };
 
 export default Settings;

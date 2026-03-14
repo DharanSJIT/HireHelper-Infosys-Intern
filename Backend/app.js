@@ -7,6 +7,7 @@
     const taskRoutes = require("./routes/taskRoutes.js");
     const authMiddleware = require("./middlewares/authMiddleware.js");
     const requestRoutes = require("./routes/requestRoutes.js");
+    const notificationRoutes = require("./routes/notificationRoutes");
 
     const app = express();
 
@@ -18,6 +19,7 @@
     app.use("/api/tasks",taskRoutes);
     app.use("/api/requests",requestRoutes);
     app.use("/api/users", userRoutes);
+    app.use("/api/notifications", notificationRoutes);
 
     app.get("/api/dashboard",authMiddleware,(req,res)=>{
         res.json({ message: "Welcome to Dashboard" });
