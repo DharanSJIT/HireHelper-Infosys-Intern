@@ -315,7 +315,7 @@ export default function Dashboard() {
         {/* PAGE CONTENT */}
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-          <Outlet />
+          <Outlet context={{ sidebarOpen }} />
         </main>
       </div>
     </div>

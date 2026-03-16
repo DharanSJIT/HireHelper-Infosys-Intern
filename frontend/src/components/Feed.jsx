@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { getFeedTasks, requestTask } from "../config/api";
+import { useOutletContext } from "react-router-dom";
 import {
   MapPin,
   Calendar as CalendarIcon,
@@ -8,326 +9,236 @@ import {
   Loader2,
   CheckCircle2,
   Rss,
-  Search
+  Search,
+  SlidersHorizontal,
 } from "lucide-react";
 
 function formatDate(dateValue) {
   if (!dateValue) return "-";
-
   const date = new Date(dateValue);
-
   if (Number.isNaN(date.getTime())) return "-";
-
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-function MetaRow({ icon, children }) {
+function MetaChip({ icon, children }) {
   return (
-    <div className="flex items-start gap-2.5 text-[13px] text-slate-600 font-medium">
-      <span className="flex-shrink-0 mt-0.5 text-slate-400">{icon}</span>
-      <span className="leading-snug">{children}</span>
+    <div className="flex items-center gap-2 text-[13px] text-slate-600">
+      <span className="flex-shrink-0 text-slate-400">{icon}</span>
+      <span className="truncate">{children}</span>
     </div>
   );
 }
 
+const CATEGORIES = ["All", "Moving", "Cleaning", "General", "Assembly", "Garden", "Delivery"];
+
 export default function Feed() {
+  const { sidebarOpen } = useOutletContext() || { sidebarOpen: true };
 
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  const [searchTitle, setSearchTitle] = useState("");
+  const [tasks, setTasks]           = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState("");
+  const [searchTitle, setSearchTitle]       = useState("");
   const [searchLocation, setSearchLocation] = useState("");
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [requestState, setRequestState]     = useState({});
 
-  const [requestState, setRequestState] = useState({});
-
-  // LOAD TASKS
   const loadFeed = async () => {
     try {
-
       setLoading(true);
       setError("");
-
       const { data } = await getFeedTasks();
-
       setTasks(data?.tasks || []);
-
     } catch (err) {
-
-      setError(
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        "Failed to load tasks"
-      );
-
+      setError(err.response?.data?.message || err.response?.data?.error || "Failed to load tasks");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadFeed();
-  }, []);
+  useEffect(() => { loadFeed(); }, []);
 
-  // FILTER TASKS
   const filteredTasks = useMemo(() => {
-
     return tasks.filter((task) => {
-
-      const titleMatch = task.title
-        ?.toLowerCase()
-        .includes(searchTitle.toLowerCase());
-
-      const locationMatch = task.location
-        ?.toLowerCase()
-        .includes(searchLocation.toLowerCase());
-
-      return titleMatch && locationMatch;
-
+      const titleMatch    = task.title?.toLowerCase().includes(searchTitle.toLowerCase());
+      const locationMatch = task.location?.toLowerCase().includes(searchLocation.toLowerCase());
+      const categoryMatch = activeCategory === "All" || task.category === activeCategory;
+      return titleMatch && locationMatch && categoryMatch;
     });
+  }, [tasks, searchTitle, searchLocation, activeCategory]);
 
-  }, [tasks, searchTitle, searchLocation]);
+  const pendingIds = useMemo(() =>
+    new Set(Object.keys(requestState).filter((id) => requestState[id]?.loading)),
+    [requestState]
+  );
 
-  const pendingIds = useMemo(() => {
-    return new Set(
-      Object.keys(requestState).filter(
-        (id) => requestState[id]?.loading
-      )
-    );
-  }, [requestState]);
-
-  // REQUEST TASK
   const handleRequest = async (taskId) => {
-
-    setRequestState((prev) => ({
-      ...prev,
-      [taskId]: { loading: true, success: "", error: "" },
-    }));
-
+    setRequestState((prev) => ({ ...prev, [taskId]: { loading: true, success: "", error: "" } }));
     try {
-
       const { data } = await requestTask(taskId);
-
-      setRequestState((prev) => ({
-        ...prev,
-        [taskId]: {
-          loading: false,
-          success: data?.message || "Request Sent Successfully",
-          error: "",
-        },
-      }));
-
+      setRequestState((prev) => ({ ...prev, [taskId]: { loading: false, success: data?.message || "Request Sent Successfully", error: "" } }));
     } catch (err) {
-
-      setRequestState((prev) => ({
-        ...prev,
-        [taskId]: {
-          loading: false,
-          success: "",
-          error:
-            err.response?.data?.message ||
-            err.response?.data?.error ||
-            "Request failed",
-        },
-      }));
-
+      setRequestState((prev) => ({ ...prev, [taskId]: { loading: false, success: "", error: err.response?.data?.message || err.response?.data?.error || "Request failed" } }));
     }
   };
 
   return (
-    <div className="max-w-[80vw] mx-auto space-y-6 pb-12">
+    <div className={`mx-auto space-y-6 pb-12 page-enter ${sidebarOpen ? 'w-full' : 'max-w-7xl'}`}>
 
-      {/* HEADER */}
-      <div className="surface-card p-6 md:p-8 flex items-center justify-between gap-4">
-
-        <div>
-          <h2 className="section-head">Task Feed</h2>
-          <p className="section-sub mt-1 max-w-lg">
-            Browse open tasks posted by users and help them.
-          </p>
+      {/* ── Page header ────────────────────────────────────────── */}
+      <div className="surface-card p-6 md:p-7">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="section-head">Task Feed</h1>
+            <p className="section-sub mt-1">Browse open tasks posted by users and help them.</p>
+          </div>
+          {!loading && !error && (
+            <span className="badge-blue px-4 py-1.5 text-sm font-bold">
+              {filteredTasks.length} {filteredTasks.length === 1 ? "Task" : "Tasks"} Open
+            </span>
+          )}
         </div>
-
-        {!loading && !error && (
-          <span className="inline-flex items-center justify-center bg-blue-50 text-blue-700 border border-blue-200 shadow-sm rounded-full text-sm font-bold px-4 py-1.5">
-            {filteredTasks.length} {filteredTasks.length === 1 ? "Task" : "Tasks"} Open
-          </span>
-        )}
-
       </div>
 
-      {/* SEARCH BAR */}
-
-      <div className="surface-card p-4 flex flex-col md:flex-row gap-3">
-
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400"/>
-          <input
-            type="text"
-            placeholder="Search task name..."
-            value={searchTitle}
-            onChange={(e) => setSearchTitle(e.target.value)}
-            className="border pl-9 pr-3 py-2 rounded-lg w-full"
-          />
+      {/* ── Search bar ─────────────────────────────────────────── */}
+      <div className="surface-card p-4">
+        <div className="flex flex-col md:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search task name..."
+              value={searchTitle}
+              onChange={(e) => setSearchTitle(e.target.value)}
+              className="input-field pl-10"
+            />
+          </div>
+          <div className="relative flex-1">
+            <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search location..."
+              value={searchLocation}
+              onChange={(e) => setSearchLocation(e.target.value)}
+              className="input-field pl-10"
+            />
+          </div>
         </div>
 
-        <input
-          type="text"
-          placeholder="Search location..."
-          value={searchLocation}
-          onChange={(e) => setSearchLocation(e.target.value)}
-          className="border px-3 py-2 rounded-lg w-full"
-        />
-
+        {/* Category pills */}
+        <div className="flex gap-2 mt-3 flex-wrap">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-150 cursor-pointer ${
+                activeCategory === cat
+                  ? "bg-blue-600 text-white border-blue-600"
+                  : "bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-700"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* LOADING */}
+      {/* ── Loading ────────────────────────────────────────────── */}
       {loading && (
-        <div className="text-center py-20">
-
-          <Loader2 className="animate-spin w-8 h-8 mx-auto text-blue-600" />
-
-          <p className="text-sm text-gray-500 mt-3">
-            Loading tasks...
-          </p>
-
+        <div className="surface-card p-20 flex flex-col items-center gap-3 text-slate-500">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          <p className="text-sm font-medium">Loading tasks...</p>
         </div>
       )}
 
-      {/* ERROR */}
+      {/* ── Error ─────────────────────────────────────────────── */}
       {error && (
-        <div className="alert-error mt-2 flex gap-2 items-center">
-          <AlertCircle className="w-5 h-5" />
+        <div className="alert-error">
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
           <p>{error}</p>
         </div>
       )}
 
-      {/* EMPTY */}
+      {/* ── Empty ─────────────────────────────────────────────── */}
       {!loading && !error && filteredTasks.length === 0 && (
-        <div className="surface-card mt-6 text-center py-12">
-
-          <Rss className="w-10 h-10 text-gray-400 mx-auto mb-3" />
-
-          <h3 className="text-lg font-semibold">
-            No tasks found
-          </h3>
-
-          <p className="text-sm text-gray-500 mt-2">
-            Try searching different keywords.
-          </p>
-
+        <div className="surface-card">
+          <div className="empty-state">
+            <div className="empty-icon">
+              <Rss className="w-7 h-7 text-slate-400" />
+            </div>
+            <h3 className="text-base font-bold text-slate-900">No tasks found</h3>
+            <p className="section-sub mt-1.5 max-w-xs">Try adjusting your search or category filter.</p>
+          </div>
         </div>
       )}
 
-      {/* TASK GRID */}
+      {/* ── Task Grid ─────────────────────────────────────────── */}
       {!loading && !error && filteredTasks.length > 0 && (
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 stagger-children">
           {filteredTasks.map((task) => {
-
-            const state = requestState[task._id] || {
-              loading: false,
-              success: "",
-              error: "",
-            };
-
-            const isDisabled =
-              state.loading ||
-              state.success ||
-              pendingIds.has(task._id) ||
-              task.status !== "open";
-
+            const state = requestState[task._id] || { loading: false, success: "", error: "" };
+            const isDisabled = state.loading || state.success || pendingIds.has(task._id) || task.status !== "open";
             const userName = task.createdBy
-              ? `${task.createdBy.first_name || ""} ${task.createdBy.last_name || ""}`
+              ? `${task.createdBy.first_name || ""} ${task.createdBy.last_name || ""}`.trim()
               : "Anonymous";
 
             return (
-              <article
-                key={task._id}
-                className="surface-card-hover overflow-hidden flex flex-col"
-              >
+              <article key={task._id} className="surface-card-hover overflow-hidden flex flex-col">
 
-                {task.picture && (
-                  <div className="h-44 w-full overflow-hidden border-b">
-
-                    <img
-                      src={task.picture}
-                      alt={task.title}
-                      className="h-full w-full object-cover"
-                    />
-
+                {/* Task image */}
+                {task.picture ? (
+                  <div className="h-44 overflow-hidden border-b border-slate-100">
+                    <img src={task.picture} alt={task.title} className="h-full w-full object-cover" />
                   </div>
+                ) : (
+                  <div className="h-2 bg-blue-600 w-full" />
                 )}
 
-                <div className="p-6 flex flex-col flex-1">
+                <div className="p-5 flex flex-col flex-1">
 
-                  <div className="flex justify-between items-start mb-3">
-
-                    <h3 className="text-lg font-bold text-slate-900">
-                      {task.title}
-                    </h3>
-
-                    <span className="bg-green-50 text-green-700 border border-green-200 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase">
+                  {/* Title + status */}
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <h3 className="text-base font-bold text-slate-900 leading-snug">{task.title}</h3>
+                    <span className={`flex-shrink-0 badge ${task.status === 'open' ? 'badge-green' : 'badge-amber'}`}>
                       {task.status}
                     </span>
-
                   </div>
 
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-3">
-                    {task.description}
-                  </p>
+                  {/* Description */}
+                  <p className="text-sm text-slate-600 line-clamp-2 mb-4 leading-relaxed">{task.description}</p>
 
-                  <div className="space-y-2 mb-4">
-
-                    <MetaRow icon={<User className="w-4 h-4" />}>
-                      {userName || "Anonymous"}
-                    </MetaRow>
-
-                    <MetaRow icon={<MapPin className="w-4 h-4" />}>
-                      {task.location}
-                    </MetaRow>
-
-                    <MetaRow icon={<CalendarIcon className="w-4 h-4" />}>
-                      {formatDate(task.startDate)}{" "}
-                      {task.startTime ? `• ${task.startTime}` : ""}
-                    </MetaRow>
-
+                  {/* Meta chips */}
+                  <div className="space-y-1.5 mb-4">
+                    <MetaChip icon={<User className="w-3.5 h-3.5" />}>{userName || "Anonymous"}</MetaChip>
+                    <MetaChip icon={<MapPin className="w-3.5 h-3.5" />}>{task.location}</MetaChip>
+                    <MetaChip icon={<CalendarIcon className="w-3.5 h-3.5" />}>
+                      {formatDate(task.startDate)}{task.startTime ? ` · ${task.startTime}` : ""}
+                    </MetaChip>
                   </div>
 
+                  {/* Category tag */}
                   {task.category && (
-                    <span className="inline-block bg-blue-50 text-blue-700 text-xs font-semibold px-2 py-1 rounded mb-4">
-                      {task.category}
-                    </span>
+                    <div className="mb-4">
+                      <span className="pill-tag">{task.category}</span>
+                    </div>
                   )}
 
+                  {/* Feedback messages */}
+                  {state.error && <p className="text-xs text-red-600 mb-2 font-medium">{state.error}</p>}
+                  {state.success && <p className="text-xs text-emerald-600 mb-2 font-medium">{state.success}</p>}
+
+                  {/* Action button */}
                   <div className="mt-auto">
-
-                    {state.error && (
-                      <p className="text-xs text-red-500 mb-2">
-                        {state.error}
-                      </p>
-                    )}
-
-                    {state.success && (
-                      <p className="text-xs text-green-600 mb-2">
-                        {state.success}
-                      </p>
-                    )}
-
                     <button
                       onClick={() => handleRequest(task._id)}
                       disabled={isDisabled}
-                      className={`w-full py-2.5 rounded-lg text-sm font-semibold transition ${
+                      className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 cursor-pointer border ${
                         state.success
-                          ? "bg-green-100 text-green-700"
-                          : "bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                          : task.status !== "open"
+                          ? "bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed"
+                          : "bg-blue-600 text-white border-blue-600 hover:bg-blue-700 disabled:opacity-50"
                       }`}
                     >
-
                       {state.loading ? (
                         <span className="flex items-center justify-center gap-2">
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -343,13 +254,10 @@ export default function Feed() {
                       ) : (
                         "Send Request to Help"
                       )}
-
                     </button>
-
                   </div>
 
                 </div>
-
               </article>
             );
           })}

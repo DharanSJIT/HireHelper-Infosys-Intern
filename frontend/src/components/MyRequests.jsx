@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import { getMyRequests } from '../config/api';
 import { Send, User, Calendar, MapPin, Clock, AlertCircle, Loader2, CheckCircle, XCircle } from 'lucide-react';
 
@@ -11,6 +11,7 @@ function formatDate(dateValue) {
 }
 
 export default function MyRequests() {
+  const { sidebarOpen } = useOutletContext() || { sidebarOpen: true };
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -39,7 +40,7 @@ export default function MyRequests() {
   };
 
   return (
-    <div className="max-w-[80vw] mx-auto space-y-5">
+    <div className={`mx-auto space-y-6 pb-12 page-enter ${sidebarOpen ? 'w-full' : 'max-w-7xl'}`}>
       <div className="surface-card p-5 md:p-6">
         <h2 className="page-title">My Sent Requests</h2>
         <p className="text-sm text-slate-500 mt-0.5">Track all task requests you have submitted and their current status.</p>
@@ -93,7 +94,7 @@ export default function MyRequests() {
       {!loading && !error && requests.length > 0 && (
         <div className="space-y-4">
           {requests.map((req) => (
-            <div key={req._id} className="surface-card p-5">
+            <div key={req._id} className="surface-card-hover p-5">
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 space-y-3">
                   <div className="flex items-start justify-between gap-3">
@@ -101,10 +102,10 @@ export default function MyRequests() {
                     <span
                       className={`badge flex-shrink-0 ${
                         req.status === 'pending'
-                          ? 'badge-yellow'
+                          ? 'badge-amber'
                           : req.status === 'accepted'
                           ? 'badge-green'
-                          : 'badge-gray'
+                          : 'badge-red'
                       }`}
                     >
                       {req.status === 'pending' && <Clock className="w-3 h-3" />}

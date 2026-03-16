@@ -12,6 +12,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { useNotifications } from "../context/NotificationContext";
+import { useOutletContext } from "react-router-dom";
 
 function formatDate(dateValue) {
   if (!dateValue) return "-";
@@ -59,6 +60,7 @@ const TYPE_META = {
 };
 
 export default function Notifications() {
+  const { sidebarOpen } = useOutletContext() || { sidebarOpen: true };
   const { notifications, unreadCount, loading, error, markOneRead, markAllRead } = useNotifications();
   const [actionError, setActionError] = useState("");
 
@@ -86,7 +88,7 @@ export default function Notifications() {
   };
 
   return (
-    <section className="max-w-5xl mx-auto space-y-5 page-enter">
+    <section className={`mx-auto space-y-6 pb-12 page-enter ${sidebarOpen ? 'w-full' : 'max-w-5xl'}`}>
       <div className="surface-card p-5 md:p-6 bg-gradient-to-r from-blue-50 via-white to-sky-50 border-blue-100">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
