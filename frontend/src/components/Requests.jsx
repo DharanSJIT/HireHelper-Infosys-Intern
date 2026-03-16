@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getRequestsForMyTasks, acceptRequest, rejectRequest } from '../config/api';
 import { Inbox, User, Calendar, MapPin, CheckCircle, XCircle, Clock, AlertCircle, Loader2 } from 'lucide-react';
+import { useConfirmDialog } from "../context/ConfirmDialogContext";
 
 function formatDate(dateValue) {
   if (!dateValue) return '-';
@@ -15,6 +16,7 @@ export default function Requests() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [actionState, setActionState] = useState({});
+  const { confirm } = useConfirmDialog();
 
   useEffect(() => {
     loadRequests();
@@ -48,6 +50,16 @@ export default function Requests() {
   };
 
   const handleReject = async (requestId) => {
+    const confirmed = await confirm({
+      title: "Reject Request",
+      message: "You are about to reject this helper request. You can not auto-restore it later.",
+      confirmText: "Reject Request",
+      cancelText: "Cancel",
+      tone: "danger",
+    });
+
+    if (!confirmed) return;
+
     setActionState((prev) => ({ ...prev, [requestId]: { loading: true, error: '' } }));
     try {
       await rejectRequest(requestId);

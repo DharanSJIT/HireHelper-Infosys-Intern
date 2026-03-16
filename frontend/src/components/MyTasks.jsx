@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { getMyTasks, deleteTask } from "../config/api";
 import { useNavigate } from "react-router-dom";
+import { useConfirmDialog } from "../context/ConfirmDialogContext";
 import {
   Search,
   MapPin,
@@ -28,6 +29,7 @@ function formatDateTime(dateValue, timeValue) {
 export default function MyTasks() {
 
   const navigate = useNavigate();
+  const { confirm } = useConfirmDialog();
 
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -72,8 +74,13 @@ export default function MyTasks() {
   /* ================= DELETE TASK ================= */
 
   const handleDelete = async (id) => {
-
-    const confirmDelete = window.confirm("Delete this task?");
+    const confirmDelete = await confirm({
+      title: "Delete Task",
+      message: "This task will be permanently deleted. This action cannot be undone.",
+      confirmText: "Delete Task",
+      cancelText: "Keep Task",
+      tone: "danger",
+    });
 
     if (!confirmDelete) return;
 
@@ -91,9 +98,7 @@ export default function MyTasks() {
 
       console.error("Delete error:", err);
 
-      alert(
-        err.response?.data?.message || "Failed to delete task"
-      );
+      setError(err.response?.data?.message || "Failed to delete task");
 
     }
 
