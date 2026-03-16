@@ -1,97 +1,142 @@
-import React, { useEffect, useState } from 'react';
-import { getNotifications, markNotificationRead, markAllNotificationsRead } from '../config/api';
-import { Bell, CheckCircle, XCircle, Inbox, Loader2, AlertCircle } from 'lucide-react';
+import React, { useMemo, useState } from "react";
+import {
+  Bell,
+  Check,
+  CheckCheck,
+  CheckCircle2,
+  Clock3,
+  Inbox,
+  Loader2,
+  MessageSquareWarning,
+  UserRound,
+  XCircle,
+} from "lucide-react";
+import { useNotifications } from "../context/NotificationContext";
 
 function formatDate(dateValue) {
-  if (!dateValue) return '-';
+  if (!dateValue) return "-";
+
   const date = new Date(dateValue);
-  if (Number.isNaN(date.getTime())) return '-';
+  if (Number.isNaN(date.getTime())) return "-";
+
   const now = new Date();
   const diff = now - date;
   const minutes = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
-  
-  if (minutes < 1) return 'Just now';
+
+  if (minutes < 1) return "Just now";
   if (minutes < 60) return `${minutes}m ago`;
   if (hours < 24) return `${hours}h ago`;
   if (days < 7) return `${days}d ago`;
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: now.getFullYear() === date.getFullYear() ? undefined : "numeric",
+  });
 }
 
+const TYPE_META = {
+  new_request: {
+    icon: Inbox,
+    iconWrap: "bg-blue-50 text-blue-700 border-blue-200",
+    badge: "New Request",
+    badgeClass: "badge-blue",
+  },
+  request_accepted: {
+    icon: CheckCircle2,
+    iconWrap: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    badge: "Accepted",
+    badgeClass: "badge-green",
+  },
+  request_rejected: {
+    icon: XCircle,
+    iconWrap: "bg-rose-50 text-rose-700 border-rose-200",
+    badge: "Rejected",
+    badgeClass: "badge-red",
+  },
+};
+
 export default function Notifications() {
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { notifications, unreadCount, loading, error, markOneRead, markAllRead } = useNotifications();
+  const [actionError, setActionError] = useState("");
 
-  useEffect(() => {
-    loadNotifications();
-  }, []);
-
-  const loadNotifications = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const { data } = await getNotifications();
-      setNotifications(data?.notifications || []);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load notifications.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const readCount = useMemo(
+    () => notifications.reduce((count, item) => (item.isRead ? count + 1 : count), 0),
+    [notifications],
+  );
 
   const handleMarkRead = async (notificationId) => {
     try {
-      await markNotificationRead(notificationId);
-      setNotifications((prev) =>
-        prev.map((n) => (n._id === notificationId ? { ...n, isRead: true } : n))
-      );
+      setActionError("");
+      await markOneRead(notificationId);
     } catch (err) {
-      // Silent fail
+      setActionError(err.response?.data?.message || "Failed to mark notification as read.");
     }
   };
 
   const handleMarkAllRead = async () => {
     try {
-      await markAllNotificationsRead();
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      setActionError("");
+      await markAllRead();
     } catch (err) {
-      // Silent fail
+      setActionError(err.response?.data?.message || "Failed to mark all notifications as read.");
     }
   };
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
-
   return (
-    <div className="max-w-4xl mx-auto space-y-5">
-      <div className="surface-card p-5 md:p-6">
-        <div className="flex items-center justify-between">
+    <section className="max-w-5xl mx-auto space-y-5 page-enter">
+      <div className="surface-card p-5 md:p-6 bg-gradient-to-r from-blue-50 via-white to-sky-50 border-blue-100">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="page-title">Notifications</h2>
-            <p className="text-sm text-slate-500 mt-0.5">Stay updated on your task requests and activities.</p>
+            <p className="text-xs font-semibold tracking-[0.16em] uppercase text-blue-700">Notification Center</p>
+            <h2 className="text-2xl font-bold text-slate-900 mt-1">Activity Updates</h2>
+            <p className="text-sm text-slate-600 mt-1">
+              Live updates from requests, task activity, and response decisions.
+            </p>
           </div>
-          {unreadCount > 0 && (
-            <button
-              onClick={handleMarkAllRead}
-              className="btn-secondary text-sm px-4 py-2"
-            >
-              Mark all read
-            </button>
-          )}
+
+          <div className="flex items-center gap-2">
+            <span className="badge-blue px-3 py-1.5">{unreadCount} unread</span>
+            {unreadCount > 0 && (
+              <button onClick={handleMarkAllRead} className="btn-secondary text-sm px-4 py-2">
+                <CheckCheck className="w-4 h-4" />
+                Mark all read
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-5">
+          <div className="bg-white/90 border border-slate-200 rounded-lg px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Total</p>
+            <p className="text-xl font-bold text-slate-900 mt-0.5">{notifications.length}</p>
+          </div>
+
+          <div className="bg-white/90 border border-slate-200 rounded-lg px-4 py-3">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Unread</p>
+            <p className="text-xl font-bold text-blue-700 mt-0.5">{unreadCount}</p>
+          </div>
+
+          <div className="bg-white/90 border border-slate-200 rounded-lg px-4 py-3 col-span-2 sm:col-span-1">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Read</p>
+            <p className="text-xl font-bold text-emerald-700 mt-0.5">{readCount}</p>
+          </div>
         </div>
       </div>
 
       {loading && (
-        <div className="surface-card p-8 flex justify-center">
-          <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+        <div className="surface-card p-10 flex items-center justify-center gap-2 text-slate-600">
+          <Loader2 className="w-5 h-5 animate-spin" />
+          <span className="text-sm font-medium">Loading notifications...</span>
         </div>
       )}
 
-      {error && (
+      {(error || actionError) && (
         <div className="alert-error">
-          <AlertCircle className="w-5 h-5" />
-          <p className="text-sm font-medium">{error}</p>
+          <MessageSquareWarning className="w-5 h-5" />
+          <p className="font-medium">{actionError || error}</p>
         </div>
       )}
 
@@ -103,7 +148,7 @@ export default function Notifications() {
             </div>
             <h3 className="text-base font-semibold text-slate-900">No notifications yet</h3>
             <p className="text-sm text-slate-500 mt-1.5 max-w-xs leading-relaxed">
-              You'll see notifications here when there's activity on your tasks.
+              As soon as someone requests a task or responds, live updates will appear here.
             </p>
           </div>
         </div>
@@ -111,55 +156,69 @@ export default function Notifications() {
 
       {!loading && !error && notifications.length > 0 && (
         <div className="space-y-3">
-          {notifications.map((notif) => (
-            <div
-              key={notif._id}
-              onClick={() => !notif.isRead && handleMarkRead(notif._id)}
-              className={`surface-card p-4 cursor-pointer transition-all ${
-                !notif.isRead ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
-              }`}
-            >
-              <div className="flex gap-3">
-                <div className="flex-shrink-0 mt-1">
-                  {notif.type === 'new_request' && (
-                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                      <Inbox className="w-5 h-5 text-blue-600" />
-                    </div>
-                  )}
-                  {notif.type === 'request_accepted' && (
-                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
-                      <CheckCircle className="w-5 h-5 text-emerald-600" />
-                    </div>
-                  )}
-                  {notif.type === 'request_rejected' && (
-                    <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-                      <XCircle className="w-5 h-5 text-red-600" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <h4 className="text-sm font-bold text-slate-900">{notif.title}</h4>
-                    {!notif.isRead && (
-                      <span className="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0 mt-1.5" />
-                    )}
+          {notifications.map((notif) => {
+            const meta = TYPE_META[notif.type] || TYPE_META.new_request;
+            const EventIcon = meta.icon;
+
+            return (
+              <article
+                key={notif._id}
+                className={`surface-card p-4 sm:p-5 transition-all ${
+                  notif.isRead ? "" : "border-blue-200 bg-blue-50/40"
+                }`}
+              >
+                <div className="flex items-start gap-3 sm:gap-4">
+                  <div
+                    className={`w-10 h-10 rounded-xl border flex items-center justify-center flex-shrink-0 ${meta.iconWrap}`}
+                  >
+                    <EventIcon className="w-5 h-5" />
                   </div>
-                  <p className="text-sm text-slate-600 mt-1">{notif.message}</p>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
-                    <span>{formatDate(notif.createdAt)}</span>
-                    {notif.task?.title && (
-                      <>
-                        <span>•</span>
-                        <span className="font-medium">{notif.task.title}</span>
-                      </>
-                    )}
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="text-sm sm:text-[15px] font-semibold text-slate-900">{notif.title}</h4>
+                          <span className={meta.badgeClass}>{meta.badge}</span>
+                          {!notif.isRead && <span className="badge-blue">Unread</span>}
+                        </div>
+
+                        <p className="text-sm text-slate-600 mt-1">{notif.message}</p>
+                      </div>
+
+                      {!notif.isRead && (
+                        <button
+                          onClick={() => handleMarkRead(notif._id)}
+                          className="btn-ghost text-xs sm:text-sm self-start"
+                        >
+                          <Check className="w-4 h-4" />
+                          Mark read
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                      <span className="inline-flex items-center gap-1">
+                        <Clock3 className="w-3.5 h-3.5" />
+                        {formatDate(notif.createdAt)}
+                      </span>
+
+                      {notif.actor?.first_name && (
+                        <span className="inline-flex items-center gap-1">
+                          <UserRound className="w-3.5 h-3.5" />
+                          {notif.actor.first_name} {notif.actor.last_name}
+                        </span>
+                      )}
+
+                      {notif.task?.title && <span className="badge-slate">{notif.task.title}</span>}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              </article>
+            );
+          })}
         </div>
       )}
-    </div>
+    </section>
   );
 }

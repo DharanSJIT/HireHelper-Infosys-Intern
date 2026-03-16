@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { getNotifications, getProfile } from "../config/api";
+import { getProfile } from "../config/api";
+import { useNotifications } from "../context/NotificationContext";
 
 import {
   Rss,
@@ -57,8 +58,8 @@ export default function Dashboard() {
   const [isDesktop, setIsDesktop] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth >= 1024 : true
   );
-  const [unreadCount, setUnreadCount] = useState(0);
   const [user, setUser] = useState(null);
+  const { unreadCount } = useNotifications();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -67,10 +68,6 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadProfile();
-    loadNotifications();
-
-    const interval = setInterval(loadNotifications, 30000);
-    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -87,19 +84,10 @@ export default function Dashboard() {
   const loadProfile = async () => {
     try {
       const res = await getProfile();
-      setUser(res.data);
+      setUser(res.data?.user || null);
     } catch (err) {
       console.log(err);
     }
-  };
-
-  /* ================= NOTIFICATIONS ================= */
-
-  const loadNotifications = async () => {
-    try {
-      const { data } = await getNotifications();
-      setUnreadCount(data?.unreadCount || 0);
-    } catch (err) {}
   };
 
   /* ================= LOGOUT ================= */

@@ -18,8 +18,11 @@ const addToken = (config) => {
    BASE API
 ===================================================== */
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+export const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || API_BASE_URL.replace(/\/api$/, "");
+
 const BASE_API = axios.create({
-  baseURL: "http://localhost:3000/api",
+  baseURL: API_BASE_URL,
 });
 
 BASE_API.interceptors.request.use(addToken);

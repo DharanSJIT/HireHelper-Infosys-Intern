@@ -20,6 +20,7 @@ import Notifications from "./components/Notifications";
 
 import EditProfile from "./pages/EditProfile";
 import EditTask from "./components/EditTask";
+import { NotificationProvider } from "./context/NotificationContext";
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -44,7 +45,9 @@ function App() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <NotificationProvider>
+                <Dashboard />
+              </NotificationProvider>
             </ProtectedRoute>
           }
         >
