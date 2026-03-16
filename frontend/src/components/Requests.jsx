@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
 import { getRequestsForMyTasks, acceptRequest, rejectRequest } from '../config/api';
 import { Inbox, User, Calendar, MapPin, CheckCircle, XCircle, Clock, AlertCircle, Loader2 } from 'lucide-react';
 import { useConfirmDialog } from "../context/ConfirmDialogContext";
@@ -12,6 +12,7 @@ function formatDate(dateValue) {
 }
 
 export default function Requests() {
+  const { sidebarOpen } = useOutletContext() || { sidebarOpen: true };
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -80,7 +81,7 @@ export default function Requests() {
   };
 
   return (
-    <div className="max-w-[80vw] mx-auto space-y-5">
+    <div className={`mx-auto space-y-6 pb-12 page-enter ${sidebarOpen ? 'w-full' : 'max-w-7xl'}`}>
       <div className="surface-card p-5 md:p-6">
         <h2 className="page-title">Incoming Requests</h2>
         <p className="text-sm text-slate-500 mt-0.5">Review and manage helpers who have requested your tasks.</p>
@@ -145,10 +146,10 @@ export default function Requests() {
                       <span
                         className={`badge flex-shrink-0 ${
                           req.status === 'pending'
-                            ? 'badge-yellow'
+                            ? 'badge-amber'
                             : req.status === 'accepted'
                             ? 'badge-green'
-                            : 'badge-gray'
+                            : 'badge-red'
                         }`}
                       >
                         {req.status}

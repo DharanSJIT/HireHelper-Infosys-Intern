@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { createTask } from '../config/api';
 import { useToast } from '../context/ToastContext';
 import { 
@@ -44,6 +45,7 @@ function FieldLabel({ htmlFor, children, optional }) {
 }
 
 export default function AddTask() {
+  const { sidebarOpen } = useOutletContext() || { sidebarOpen: true };
   const { toast } = useToast();
   const [form, setForm] = useState(initialForm);
   const [pictureFile, setPictureFile] = useState(null);
@@ -105,7 +107,7 @@ export default function AddTask() {
   };
 
   return (
-    <div className="max-w-[65vw] mx-auto space-y-6 pb-12">
+    <div className={`mx-auto space-y-6 pb-12 page-enter ${sidebarOpen ? 'w-full' : 'max-w-6xl'}`}>
 
       {/* Page Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
