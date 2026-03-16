@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { createTask } from '../config/api';
+import { useToast } from '../context/ToastContext';
 import { 
   AlertCircle, 
-  CheckCircle2, 
   MapPin, 
   ImagePlus, 
   Trash2, 
@@ -44,11 +44,11 @@ function FieldLabel({ htmlFor, children, optional }) {
 }
 
 export default function AddTask() {
+  const { toast } = useToast();
   const [form, setForm] = useState(initialForm);
   const [pictureFile, setPictureFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   const minStartDate = useMemo(() => new Date().toISOString().split('T')[0], []);
 
@@ -60,7 +60,6 @@ export default function AddTask() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
 
     if (!form.title || !form.description || !form.location || !form.startDate || !form.startTime) {
       setError('Please fill in all required fields.');
@@ -91,9 +90,13 @@ export default function AddTask() {
       let picture = '';
       if (pictureFile) picture = await fileToBase64(pictureFile);
       await createTask({ ...form, picture });
-      setSuccess('Task created successfully. Helpers can now find and request it.');
       setForm(initialForm);
       setPictureFile(null);
+      toast.success(
+        'Task Created Successfully',
+        'Helpers can now discover your task and send requests.',
+        3800
+      );
     } catch (err) {
       setError(err.response?.data?.message || err.response?.data?.error || 'Failed to create task.');
     } finally {
@@ -120,18 +123,12 @@ export default function AddTask() {
       <div className="surface-card overflow-hidden">
 
         {/* Status Messages */}
-        {(error || success) && (
+        {error && (
           <div className="px-6 pt-6 pb-2">
             {error && (
               <div className="alert-error">
                 <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                 {error}
-              </div>
-            )}
-            {success && (
-              <div className="alert-success">
-                <CheckCircle2 className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                {success}
               </div>
             )}
           </div>
@@ -339,7 +336,7 @@ export default function AddTask() {
                   type="file"
                   accept="image/*"
                   onChange={(e) => setPictureFile(e.target.files?.[0] || null)}
-                  className="sr-only"
+                  className="hidden"
                 />
               </div>
             </div>
@@ -349,7 +346,7 @@ export default function AddTask() {
           <div className="p-6 md:p-8 bg-slate-50/80 border-t border-slate-200 pl-11 md:pl-8 flex items-center flex-wrap gap-4 justify-between">
             <button
               type="button"
-              onClick={() => { setForm(initialForm); setPictureFile(null); setError(''); setSuccess(''); }}
+              onClick={() => { setForm(initialForm); setPictureFile(null); setError(''); }}
               className="btn-ghost"
               disabled={submitting}
             >

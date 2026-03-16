@@ -3,11 +3,14 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './App.css'
 import { ConfirmDialogProvider } from './context/ConfirmDialogContext.jsx'
+import { ToastProvider } from './context/ToastContext.jsx'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <ConfirmDialogProvider>
-      <App />
-    </ConfirmDialogProvider>
+    <ToastProvider>
+      <ConfirmDialogProvider>
+        <App />
+      </ConfirmDialogProvider>
+    </ToastProvider>
   </React.StrictMode>,
 )
