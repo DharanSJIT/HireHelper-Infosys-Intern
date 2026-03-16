@@ -126,6 +126,9 @@ exports.getMyRequests = async (req, res) => {
 
 exports.acceptRequest = async (req, res) => {
   try {
+    const io = req.app.get("io");
+    const onlineUsers = req.app.get("onlineUsers");
+
     const request = await Request.findById(req.params.requestId);
 
     if (!request) {
@@ -190,6 +193,9 @@ exports.acceptRequest = async (req, res) => {
 
 exports.rejectRequest = async (req, res) => {
   try {
+    const io = req.app.get("io");
+    const onlineUsers = req.app.get("onlineUsers");
+
     const request = await Request.findById(req.params.requestId);
 
     if (!request) {

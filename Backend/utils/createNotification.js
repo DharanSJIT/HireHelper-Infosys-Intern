@@ -16,7 +16,7 @@ exports.createNotification = async ({
 
     if (recipient.toString() === actor?.toString()) return;
 
-    const notification = await Notification.create({
+    const createdNotification = await Notification.create({
       recipient,
       actor,
       task,
@@ -25,6 +25,10 @@ exports.createNotification = async ({
       title,
       message
     });
+
+    const notification = await Notification.findById(createdNotification._id)
+      .populate("actor", "first_name last_name profilePicture")
+      .populate("task", "title status");
 
     const socketId = onlineUsers.get(recipient.toString());
 
