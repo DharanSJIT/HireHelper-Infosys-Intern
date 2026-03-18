@@ -3,7 +3,9 @@ const express = require("express");
 const http = require("http");
 const cors = require("cors");
 const { Server } = require("socket.io");
+
 const connectDB = require("./config/connectDB");
+
 const authRoutes = require("./routes/authRoutes.js");
 const userRoutes = require("./routes/userRoutes");
 const taskRoutes = require("./routes/taskRoutes.js");
@@ -13,10 +15,12 @@ const notificationRoutes = require("./routes/notificationRoutes");
 
 const app = express();
 
+/* ================= MIDDLEWARE ================= */
 app.use(cors());
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(express.json({ limit: "10mb" }));
 
+/* ================= ROUTES ================= */
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/requests", requestRoutes);
@@ -36,43 +40,58 @@ const io = new Server(server, {
   },
 });
 
-/* which users are currently connected to the server through Socket.IO. */
+/* ================= ONLINE USERS ================= */
 const onlineUsers = new Map();
 
+/* ================= SOCKET CONNECTION ================= */
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
+  console.log("🟢 User connected:", socket.id);
 
-  /* register user */
-
+  /* 🔥 REGISTER USER */
   socket.on("register", (userId) => {
-    onlineUsers.set(userId, socket.id);
+    if (!userId) return;
 
-    console.log("User registered:", userId);
+    const id = userId.toString(); // ✅ FIX (IMPORTANT)
+
+    onlineUsers.set(id, socket.id);
+
+    console.log("✅ User registered:", id);
+    console.log("🗂️ Online Users:", Array.from(onlineUsers.entries()));
   });
+
+  /* 🔴 DISCONNECT */
   socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
+    console.log("🔴 User disconnected:", socket.id);
 
     for (let [userId, socketId] of onlineUsers.entries()) {
       if (socketId === socket.id) {
         onlineUsers.delete(userId);
+        console.log("❌ Removed user:", userId);
         break;
       }
     }
+
+    console.log("🗂️ Online Users after disconnect:", Array.from(onlineUsers.entries()));
   });
 });
 
 /* ================= MAKE SOCKET GLOBAL ================= */
-
 app.set("io", io);
 app.set("onlineUsers", onlineUsers);
 
-const PORT = process.env.PORT;
+/* ================= START SERVER ================= */
+const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
-  await connectDB();
-  server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+  try {
+    await connectDB();
+
+    server.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("❌ Server start error:", error);
+  }
 };
 
 startServer();

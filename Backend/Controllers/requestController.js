@@ -17,7 +17,7 @@ exports.requestTask = async (req, res) => {
       });
     }
 
-    if (task.createdBy.toString() === req.user.id) {
+    if (task.createdBy.toString() === req.user.id.toString()) {
       return res.status(400).json({
         success: false,
         message: "You cannot request your own task",
@@ -51,14 +51,16 @@ exports.requestTask = async (req, res) => {
     const io = req.app.get("io");
     const onlineUsers = req.app.get("onlineUsers");
 
+    console.log("📢 Creating notification for task owner");
+
     await createNotification({
-      recipient: task.createdBy,
-      actor: req.user.id,
+      recipient: task.createdBy.toString(),
+      actor: req.user.id.toString(),
       task: task._id,
       request: request._id,
       type: "new_request",
-      title: "New task request",
-      message: "A helper sent a request for your task",
+      title: "New Task Request",
+      message: "A user has requested your task",
       io,
       onlineUsers,
     });
@@ -69,6 +71,7 @@ exports.requestTask = async (req, res) => {
       request,
     });
   } catch (error) {
+    console.error("❌ requestTask error:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -93,6 +96,7 @@ exports.getRequestsForMyTasks = async (req, res) => {
       requests,
     });
   } catch (error) {
+    console.error("❌ getRequestsForMyTasks error:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -118,6 +122,7 @@ exports.getMyRequests = async (req, res) => {
       requests,
     });
   } catch (error) {
+    console.error("❌ getMyRequests error:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -129,7 +134,9 @@ exports.acceptRequest = async (req, res) => {
     const io = req.app.get("io");
     const onlineUsers = req.app.get("onlineUsers");
 
-    const request = await Request.findById(req.params.requestId);
+    const request = await Request.findById(req.params.requestId)
+      .populate("requestedBy")
+      .populate("task");
 
     if (!request) {
       return res.status(404).json({ message: "Request not found" });
@@ -141,50 +148,78 @@ exports.acceptRequest = async (req, res) => {
       });
     }
 
-    const task = await Task.findById(request.task);
+    const task = await Task.findById(request.task._id);
 
-    if (task.createdBy.toString() !== req.user.id) {
+    if (task.createdBy.toString() !== req.user.id.toString()) {
       return res.status(403).json({
         message: "Not authorized",
       });
     }
 
+    // ✅ Accept request
     request.status = "accepted";
     await request.save();
 
-    await Task.findByIdAndUpdate(request.task, {
+    // ✅ Assign task
+    await Task.findByIdAndUpdate(request.task._id, {
       status: "assigned",
-      assignedTo: request.requestedBy,
+      assignedTo: request.requestedBy._id,
+    });
+
+    // ✅ Reject other requests
+    const rejectedRequests = await Request.find({
+      task: request.task._id,
+      status: "pending",
+      _id: { $ne: request._id },
     });
 
     await Request.updateMany(
       {
-        task: request.task,
+        task: request.task._id,
         status: "pending",
         _id: { $ne: request._id },
       },
-      {
-        status: "rejected",
-      },
+      { status: "rejected" }
     );
 
+    console.log("📢 Notifying accepted user");
+
+    // ✅ Notify accepted user
     await createNotification({
-      recipient: request.requestedBy,
-      actor: req.user.id,
-      task: request.task,
+      recipient: request.requestedBy._id.toString(),
+      actor: req.user.id.toString(),
+      task: request.task._id,
       request: request._id,
       type: "request_accepted",
-      title: "Request accepted",
-      message: "Your request was accepted",
+      title: "Request Accepted",
+      message: `Your request for "${request.task.title}" has been accepted`,
       io,
       onlineUsers,
     });
+
+    console.log("📢 Notifying rejected users");
+
+    // ✅ Notify rejected users
+    for (const r of rejectedRequests) {
+      await createNotification({
+        recipient: r.requestedBy.toString(),
+        actor: req.user.id.toString(),
+        task: request.task._id,
+        request: r._id,
+        type: "request_rejected",
+        title: "Request Rejected",
+        message: `Your request for "${request.task.title}" was rejected`,
+        io,
+        onlineUsers,
+      });
+    }
 
     res.json({
       success: true,
       message: "Request accepted",
     });
   } catch (error) {
+    console.error("❌ acceptRequest error:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -196,7 +231,8 @@ exports.rejectRequest = async (req, res) => {
     const io = req.app.get("io");
     const onlineUsers = req.app.get("onlineUsers");
 
-    const request = await Request.findById(req.params.requestId);
+    const request = await Request.findById(req.params.requestId)
+      .populate("task");
 
     if (!request) {
       return res.status(404).json({ message: "Request not found" });
@@ -208,9 +244,9 @@ exports.rejectRequest = async (req, res) => {
       });
     }
 
-    const task = await Task.findById(request.task);
+    const task = await Task.findById(request.task._id);
 
-    if (task.createdBy.toString() !== req.user.id) {
+    if (task.createdBy.toString() !== req.user.id.toString()) {
       return res.status(403).json({
         message: "Not authorized",
       });
@@ -219,22 +255,26 @@ exports.rejectRequest = async (req, res) => {
     request.status = "rejected";
     await request.save();
 
+    console.log("📢 Notifying rejected user");
+
     await createNotification({
-      recipient: request.requestedBy,
-      actor: req.user.id,
-      task: request.task,
+      recipient: request.requestedBy.toString(),
+      actor: req.user.id.toString(),
+      task: request.task._id,
       request: request._id,
       type: "request_rejected",
-      title: "Request rejected",
-      message: "Your request was rejected",
+      title: "Request Rejected",
+      message: `Your request for "${request.task.title}" was rejected`,
       io,
       onlineUsers,
     });
+
     res.json({
       success: true,
       message: "Request rejected",
     });
   } catch (error) {
+    console.error("❌ rejectRequest error:", error);
     res.status(500).json({ error: error.message });
   }
 };
