@@ -18,7 +18,8 @@ exports.register = async (req, res) => {
       });
     }
 
-    const existingUser = await User.findOne({ email_id });
+    const normalizedEmail = email_id.toLowerCase().trim();
+    const existingUser = await User.findOne({ email_id : normalizedEmail });
 
     if (existingUser) {
       if (existingUser.isVerified) {
