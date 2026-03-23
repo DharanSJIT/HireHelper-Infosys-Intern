@@ -11,15 +11,23 @@ exports.register = async (req, res) => {
     const { first_name, last_name, phone_number, email_id, password } =
       req.body;
 
-    if (!phone_number) {
+    if (!first_name || !last_name || !email_id || !password || !phone_number) {
       return res.status(400).json({
         success: false,
-        message: "Phone number is required",
+        message: "All fields are required",
+      });
+    }
+
+    //Phone validation
+    if (!/^\d{10}$/.test(phone_number)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid phone number",
       });
     }
 
     const normalizedEmail = email_id.toLowerCase().trim();
-    const existingUser = await User.findOne({ email_id : normalizedEmail });
+    const existingUser = await User.findOne({ email_id: normalizedEmail });
 
     if (existingUser) {
       if (existingUser.isVerified) {
@@ -29,18 +37,19 @@ exports.register = async (req, res) => {
         });
       }
 
-      await sendOtpToUser(existingUser, email_id);
+      await sendOtpToUser(existingUser, normalizedEmail);
 
       return res.json({
         success: true,
         message: "OTP resent. Please verify account",
         redirectToVerify: true,
-        email: email_id,
+        email: normalizedEmail,
       });
     }
 
     if (!validatePassword(password)) {
       return res.status(400).json({
+        success: false,
         message:
           "Password must contain uppercase, lowercase, number, special character and minimum 8 characters",
       });
@@ -52,20 +61,26 @@ exports.register = async (req, res) => {
       first_name,
       last_name,
       phone_number,
-      email_id,
+      email_id: normalizedEmail,
       password: hashedPassword,
       isVerified: false,
     });
 
-    await sendOtpToUser(user, email_id);
+    await sendOtpToUser(user, normalizedEmail);
 
     res.status(201).json({
       success: true,
       message: "User registered. OTP sent",
       redirectToVerify: true,
-      email: email_id,
+      email: normalizedEmail,
     });
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already exists",
+      });
+    }
     res.status(500).json({ error: error.message });
   }
 };
@@ -76,9 +91,13 @@ exports.verifyOtp = async (req, res) => {
   try {
     const { email_id, otp } = req.body;
 
-    const user = await User.findOne({ email_id });
+    const normalizedEmail = email_id.toLowerCase().trim();
+    const user = await User.findOne({ email_id: normalizedEmail });
 
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user)
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
 
     if (!user.otp) {
       return res.status(400).json({
@@ -121,20 +140,21 @@ exports.login = async (req, res) => {
   try {
     const { email_id, password } = req.body;
 
-    const user = await User.findOne({ email_id });
+    const normalizedEmail = email_id.toLowerCase().trim();
+    const user = await User.findOne({ email_id: normalizedEmail });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
     if (!user.isVerified) {
-      await sendOtpToUser(user, email_id);
+      await sendOtpToUser(user, normalizedEmail);
 
       return res.status(403).json({
         success: false,
         message: "Email not verified. New OTP sent.",
         redirectToVerify: true,
-        email: email_id,
+        email: normalizedEmail,
       });
     }
 
@@ -173,11 +193,12 @@ exports.resendOtp = async (req, res) => {
   try {
     const { email_id } = req.body;
 
-    const user = await User.findOne({ email_id });
+    const normalizedEmail = email_id.toLowerCase().trim();
+    const user = await User.findOne({ email_id: normalizedEmail });
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    await sendOtpToUser(user, email_id);
+    await sendOtpToUser(user, normalizedEmail);
 
     res.json({
       success: true,
@@ -194,11 +215,12 @@ exports.forgotPassword = async (req, res) => {
   try {
     const { email_id } = req.body;
 
-    const user = await User.findOne({ email_id });
+    const normalizedEmail = email_id.toLowerCase().trim();
+    const user = await User.findOne({ email_id: normalizedEmail });
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    await sendOtpToUser(user, email_id);
+    await sendOtpToUser(user, normalizedEmail);
 
     res.json({
       success: true,
@@ -215,7 +237,8 @@ exports.resetPassword = async (req, res) => {
   try {
     const { email_id, otp, newPassword } = req.body;
 
-    const user = await User.findOne({ email_id });
+    const normalizedEmail = email_id.toLowerCase().trim();
+    const user = await User.findOne({ email_id: normalizedEmail });
 
     if (!user) return res.status(404).json({ message: "User not found" });
 

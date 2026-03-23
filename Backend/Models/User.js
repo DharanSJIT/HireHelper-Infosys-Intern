@@ -20,13 +20,15 @@ const userSchema = new mongoose.Schema(
     },
 
     phone_number: {
-      type: Number,
+      type: String,
       required: true,
     },
 
     email_id: {
       type: String,
       required: true,
+      lowercase: true,
+      trim: true,
       unique: true,
     },
 
