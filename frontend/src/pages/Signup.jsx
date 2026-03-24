@@ -90,136 +90,143 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-[500px]">
+    <div className="min-h-screen auth-shell flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-[640px] auth-card overflow-hidden">
+        <section className="px-6 py-8 sm:px-10 sm:py-10 bg-white">
+          <div className="max-w-xl mx-auto">
+            <div className="mb-6">
+              <div className="inline-flex w-11 h-11 bg-blue-600 rounded-xl items-center justify-center mb-4 shadow-[0_10px_20px_-12px_rgba(37,99,235,0.9)]">
+                <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" className="w-5 h-5 stroke-white">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Create your account</h1>
+              <p className="text-sm text-slate-500 mt-1.5">Join the HireHelper platform for free</p>
+            </div>
 
-        <div className="text-center mb-8">
-          <div className="inline-flex w-12 h-12 bg-blue-600 rounded-xl items-center justify-center mb-4">
-            <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" className="w-6 h-6 stroke-white">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
+            {error && <div className="alert-error mb-5">{error}</div>}
+
+            <form onSubmit={handleSignup} className="space-y-4">
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div className="input-group">
+                  <label className="input-label">First Name *</label>
+                  <input
+                    type="text"
+                    placeholder="First"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="input-field"
+                  />
+                </div>
+
+                <div className="input-group">
+                  <label className="input-label">Last Name *</label>
+                  <input
+                    type="text"
+                    placeholder="Last"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="input-field"
+                  />
+                </div>
+              </div>
+
+              <div className="input-group">
+                <label className="input-label">Email Address *</label>
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="input-field"
+                />
+              </div>
+
+              <div className="input-group">
+                <label className="input-label">Phone Number *</label>
+                <input
+                  type="tel"
+                  placeholder="0123456789"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  className="input-field"
+                />
+              </div>
+
+              <div className="input-group">
+                <label className="input-label">Password *</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Create a password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="input-field pr-11"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
+                  >
+                    <EyeIcon open={showPassword} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                {passwordRules.map((rule) => {
+                  const passed = rule.test(password);
+                  return (
+                    <div key={rule.id} className="flex items-center gap-2">
+                      <span className={`w-1.5 h-1.5 rounded-full ${passed ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                      <span className={`text-xs ${passed ? 'text-emerald-700 font-medium' : 'text-slate-500'}`}>
+                        {rule.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="input-group">
+                <label className="input-label">Confirm Password *</label>
+
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    placeholder="Repeat your password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="input-field pr-11"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
+                  >
+                    <EyeIcon open={showConfirmPassword} />
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary w-full py-3 mt-1"
+              >
+                {loading ? 'Creating account...' : 'Create Account'}
+              </button>
+            </form>
+
+            <p className="mt-6 text-center text-sm text-slate-500">
+              Already have an account?{' '}
+              <Link to="/login" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+                Sign in
+              </Link>
+            </p>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Create your account</h1>
-          <p className="text-sm text-slate-500 mt-1">Join the HireHelper platform for free</p>
-        </div>
-
-        <div className="surface-card px-7 py-8">
-
-          {error && (
-            <div className="alert-error mb-5">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSignup} className="space-y-4">
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="input-group">
-                <label className="input-label">First Name *</label>
-                <input
-                  type="text"
-                  placeholder="First"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="input-field"
-                />
-              </div>
-
-              <div className="input-group">
-                <label className="input-label">Last Name *</label>
-                <input
-                  type="text"
-                  placeholder="Last"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="input-field"
-                />
-              </div>
-            </div>
-
-            <div className="input-group">
-              <label className="input-label">Email Address *</label>
-              <input
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="input-field"
-              />
-            </div>
-
-            <div className="input-group">
-              <label className="input-label">Phone Number *</label>
-              <input
-                type="tel"
-                placeholder="0123456789"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                className="input-field"
-              />
-            </div>
-
-            <div className="input-group">
-              <label className="input-label">Password *</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Create a password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="input-field pr-11"
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
-                >
-                  <EyeIcon open={showPassword} />
-                </button>
-              </div>
-            </div>
-
-            <div className="input-group">
-              <label className="input-label">Confirm Password *</label>
-
-              <div className="relative">
-                <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="Repeat your password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="input-field pr-11"
-                />
-
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
-                >
-                  <EyeIcon open={showConfirmPassword} />
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary w-full py-2.5 mt-1"
-            >
-              {loading ? 'Creating account...' : 'Create Account'}
-            </button>
-
-          </form>
-        </div>
-
-        <p className="mt-5 text-center text-sm text-slate-500">
-          Already have an account?{' '}
-          <Link to="/login" className="font-semibold text-blue-600">
-            Sign in
-          </Link>
-        </p>
-
+        </section>
       </div>
     </div>
   );

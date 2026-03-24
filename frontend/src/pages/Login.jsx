@@ -23,9 +23,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(
-    localStorage.getItem("rememberMe") === "true"
-  );
+  const [rememberMe, setRememberMe] = useState(localStorage.getItem("rememberMe") === "true");
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -44,10 +42,8 @@ export default function Login() {
         password,
       });
 
-      // ✅ Save token
       localStorage.setItem("token", data.token);
 
-      // ✅ Remember Me logic
       if (rememberMe) {
         localStorage.setItem("rememberMe", "true");
         localStorage.setItem("savedEmail", email);
@@ -57,13 +53,11 @@ export default function Login() {
       }
 
       navigate("/dashboard");
-
     } catch (err) {
       const message = err.response?.data?.message;
       const shouldRedirect = err.response?.data?.redirectToVerify;
       const userEmail = err.response?.data?.email;
 
-      // 🔥 If user not verified → redirect to OTP page
       if (shouldRedirect) {
         navigate("/verify-otp", {
           state: { email: userEmail || email },
@@ -78,107 +72,84 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-10">
-      <div className="w-full max-w-[440px]">
-
-        {/* Brand */}
-        <div className="text-center mb-8">
-          <div className="inline-flex w-12 h-12 bg-blue-600 rounded-xl items-center justify-center mb-4">
-            <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" className="w-6 h-6 stroke-white">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900">Welcome back</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Sign in to your HireHelper account
-          </p>
-        </div>
-
-        <div className="surface-card px-7 py-8">
-
-          {/* Error Message */}
-          {error && (
-            <div className="alert-error mb-5 text-red-600 text-sm">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleLogin} className="space-y-4">
-
-            {/* Email */}
-            <div>
-              <label className="input-label">Email Address</label>
-              <input
-                type="email"
-                autoComplete="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="input-field"
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <label className="input-label">Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="input-field pr-11"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
-                >
-                  <EyeIcon open={showPassword} />
-                </button>
+    <div className="min-h-screen auth-shell flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-[520px] auth-card overflow-hidden">
+        <section className="px-6 py-8 sm:px-10 sm:py-10 bg-white">
+          <div className="max-w-md mx-auto">
+            <div className="mb-7">
+              <div className="inline-flex w-11 h-11 bg-blue-600 rounded-xl items-center justify-center mb-4 shadow-[0_10px_20px_-12px_rgba(37,99,235,0.9)]">
+                <svg viewBox="0 0 24 24" fill="none" strokeWidth="2" className="w-5 h-5 stroke-white">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
               </div>
+              <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">Sign in</h1>
+              <p className="text-sm text-slate-500 mt-1.5">Access your HireHelper workspace</p>
             </div>
 
-            {/* Remember + Forgot */}
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 text-sm cursor-pointer">
+            {error && <div className="alert-error mb-5 text-red-600 text-sm">{error}</div>}
+
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="input-group">
+                <label className="input-label">Email Address</label>
                 <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="input-field"
                 />
-                Remember me
-              </label>
-              <Link
-                to="/forgot-password"
-                className="text-sm font-semibold text-blue-600 hover:text-blue-700"
-              >
-                Forgot password?
+              </div>
+
+              <div className="input-group">
+                <label className="input-label">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="input-field pr-11"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
+                  >
+                    <EyeIcon open={showPassword} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="accent-blue-600"
+                  />
+                  Remember me
+                </label>
+                <Link to="/forgot-password" className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+                  Forgot password?
+                </Link>
+              </div>
+
+              <button type="submit" disabled={loading} className="btn-primary w-full py-3 mt-1">
+                {loading ? "Signing in..." : "Sign In"}
+              </button>
+            </form>
+
+            <p className="mt-6 text-center text-sm text-slate-500">
+              Don&apos;t have an account?{" "}
+              <Link to="/signup" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+                Create one free
               </Link>
-            </div>
-
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary w-full py-2.5"
-            >
-              {loading ? "Signing in..." : "Sign In"}
-            </button>
-          </form>
-        </div>
-
-        <p className="mt-5 text-center text-sm text-slate-500">
-          Don&apos;t have an account?{" "}
-          <Link
-            to="/signup"
-            className="font-semibold text-blue-600 hover:text-blue-700"
-          >
-            Create one free
-          </Link>
-        </p>
-
+            </p>
+          </div>
+        </section>
       </div>
     </div>
   );

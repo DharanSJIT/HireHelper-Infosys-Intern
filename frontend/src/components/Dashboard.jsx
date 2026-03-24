@@ -115,7 +115,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="relative flex h-screen bg-slate-50 overflow-hidden">
+    <div className="relative flex h-screen app-shell overflow-hidden">
       {/* Mobile overlay */}
       {sidebarOpen && !isDesktop && (
         <button
@@ -130,7 +130,7 @@ export default function Dashboard() {
 
       <aside
         className={`
-          fixed inset-y-0 left-0 z-40 w-72 bg-gradient-to-b from-[#103fbc] via-[#123fb2] to-[#0b2f88] flex flex-col overflow-hidden
+          fixed inset-y-0 left-0 z-40 w-72 bg-gradient-to-b from-[#0f3fb8] via-[#1343b7] to-[#0b317f] flex flex-col overflow-hidden
           transition-transform duration-300 ease-out
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           lg:static lg:z-auto lg:inset-auto
@@ -248,14 +248,14 @@ export default function Dashboard() {
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* TOP BAR */}
 
-        <header className="bg-white border-b border-slate-200">
-          <div className="flex items-center justify-between px-4 sm:px-6 h-[60px]">
+        <header className="topbar-glass border-b border-slate-200/90">
+          <div className="flex items-center justify-between px-4 sm:px-6 h-[64px]">
             {/* LEFT */}
 
             <div className="flex items-center gap-3 min-w-0">
               <button
                 onClick={toggleSidebar}
-                className="p-2 rounded-lg hover:bg-slate-100"
+                className="p-2 rounded-lg hover:bg-slate-100 transition-colors"
                 aria-label="Toggle sidebar"
               >
                 <Menu className="w-5 h-5" />
@@ -280,9 +280,9 @@ export default function Dashboard() {
             <div className="flex items-center gap-2 sm:gap-4">
               <Link
                 to="/dashboard/add-task"
-                className="hidden sm:inline-flex bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"
+                className="hidden sm:inline-flex items-center gap-1.5 btn-primary px-4 py-2.5 text-sm"
               >
-                <PlusCircle className="w-4 h-4 mr-1" />
+                <PlusCircle className="w-4 h-4" />
                 Post Task
               </Link>
 
@@ -290,7 +290,7 @@ export default function Dashboard() {
 
               <Link
                 to="/dashboard/notifications"
-                className="relative p-2 rounded-lg hover:bg-slate-100"
+                className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors"
               >
                 <Bell className="w-5 h-5" />
 
@@ -304,7 +304,7 @@ export default function Dashboard() {
               {/* PROFILE AVATAR */}
               <Link
                 to="/dashboard/settings"
-                className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center font-bold text-blue-700 uppercase"
+                className="w-9 h-9 bg-blue-100 border border-blue-200 rounded-full flex items-center justify-center font-bold text-blue-700 uppercase shadow-[0_6px_14px_-12px_rgba(37,99,235,0.8)]"
               >
                 {user?.first_name ? user.first_name.charAt(0) : "U"}
               </Link>
@@ -314,8 +314,10 @@ export default function Dashboard() {
 
         {/* PAGE CONTENT */}
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-          <Outlet context={{ sidebarOpen }} />
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-5">
+          <div className="dashboard-content-wrap min-h-full p-4 sm:p-5 md:p-6">
+            <Outlet context={{ sidebarOpen }} />
+          </div>
         </main>
       </div>
     </div>
