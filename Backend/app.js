@@ -14,11 +14,28 @@ const requestRoutes = require("./routes/requestRoutes.js");
 const notificationRoutes = require("./routes/notificationRoutes");
 
 const app = express();
+const isVercel = process.env.VERCEL === "1";
+const onlineUsers = new Map();
+const dbConnectionPromise = connectDB();
+
+app.set("io", null);
+app.set("onlineUsers", onlineUsers);
 
 /* ================= MIDDLEWARE ================= */
 app.use(cors());
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(express.json({ limit: "10mb" }));
+app.use(async (req, res, next) => {
+  try {
+    await dbConnectionPromise;
+    next();
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Database connection failed",
+    });
+  }
+});
 
 /* ================= ROUTES ================= */
 app.use("/api/auth", authRoutes);
@@ -31,67 +48,48 @@ app.get("/api/dashboard", authMiddleware, (req, res) => {
   res.json({ message: "Welcome to Dashboard" });
 });
 
-/* ================= SOCKET SERVER ================= */
-const server = http.createServer(app);
-
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-  },
+app.get("/api/health", (req, res) => {
+  res.json({ success: true, message: "Backend is running" });
 });
-
-/* ================= ONLINE USERS ================= */
-const onlineUsers = new Map();
-
-/* ================= SOCKET CONNECTION ================= */
-io.on("connection", (socket) => {
-  console.log("🟢 User connected:", socket.id);
-
-  /* 🔥 REGISTER USER */
-  socket.on("register", (userId) => {
-    if (!userId) return;
-
-    const id = userId.toString(); // ✅ FIX (IMPORTANT)
-
-    onlineUsers.set(id, socket.id);
-
-    console.log("✅ User registered:", id);
-    console.log("🗂️ Online Users:", Array.from(onlineUsers.entries()));
-  });
-
-  /* 🔴 DISCONNECT */
-  socket.on("disconnect", () => {
-    console.log("🔴 User disconnected:", socket.id);
-
-    for (let [userId, socketId] of onlineUsers.entries()) {
-      if (socketId === socket.id) {
-        onlineUsers.delete(userId);
-        console.log("❌ Removed user:", userId);
-        break;
-      }
-    }
-
-    console.log("🗂️ Online Users after disconnect:", Array.from(onlineUsers.entries()));
-  });
-});
-
-/* ================= MAKE SOCKET GLOBAL ================= */
-app.set("io", io);
-app.set("onlineUsers", onlineUsers);
 
 /* ================= START SERVER ================= */
 const PORT = process.env.PORT || 5000;
 
-const startServer = async () => {
-  try {
-    await connectDB();
+if (!isVercel) {
+  const server = http.createServer(app);
 
-    server.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
+  const io = new Server(server, {
+    cors: {
+      origin: "*",
+    },
+  });
+
+  /* ================= SOCKET CONNECTION ================= */
+  io.on("connection", (socket) => {
+    console.log("User connected:", socket.id);
+
+    socket.on("register", (userId) => {
+      if (!userId) return;
+
+      const id = userId.toString();
+      onlineUsers.set(id, socket.id);
     });
-  } catch (error) {
-    console.error("❌ Server start error:", error);
-  }
-};
 
-startServer();
+    socket.on("disconnect", () => {
+      for (let [userId, socketId] of onlineUsers.entries()) {
+        if (socketId === socket.id) {
+          onlineUsers.delete(userId);
+          break;
+        }
+      }
+    });
+  });
+
+  app.set("io", io);
+
+  server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+module.exports = app;

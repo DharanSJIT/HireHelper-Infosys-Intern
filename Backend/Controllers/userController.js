@@ -1,6 +1,6 @@
-const User = require("../models/User");
-const Task = require("../models/Task");
-const Request = require("../models/Request");
+const User = require("../Models/User");
+const Task = require("../Models/Task");
+const Request = require("../Models/Request");
 
 /* ================= UPDATE PROFILE PICTURE ================= */
 

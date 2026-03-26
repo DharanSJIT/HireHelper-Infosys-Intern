@@ -1,5 +1,5 @@
-const Request = require("../models/Request");
-const Task = require("../models/Task");
+const Request = require("../Models/Request");
+const Task = require("../Models/Task");
 const { createNotification } = require("../utils/createNotification");
 
 /* ================= REQUEST TASK ================= */
