@@ -7,7 +7,7 @@ const {
   getNotifications,
   markNotificationRead,
   markAllNotificationsRead
-} = require("../controllers/notificationController");
+} = require("../Controllers/notificationController");
 
 router.get("/", authMiddleware, getNotifications);
 

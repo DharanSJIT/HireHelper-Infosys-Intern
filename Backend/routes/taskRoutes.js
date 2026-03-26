@@ -12,7 +12,7 @@ const {
   getTaskById,
   updateTask,
   deleteTask
-} = require("../controllers/taskController");
+} = require("../Controllers/taskController");
 
 
 /* ================= CREATE TASK ================= */

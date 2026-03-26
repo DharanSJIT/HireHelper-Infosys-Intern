@@ -4,7 +4,7 @@ const router = express.Router();
 const authMiddleware = require("../middlewares/authMiddleware");
 
 // ✅ Import controller
-const requestController = require("../controllers/requestController");
+const requestController = require("../Controllers/requestController");
 
 const {
   requestTask,

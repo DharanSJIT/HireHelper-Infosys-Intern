@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const upload = require("../middlewares/upload");
-const { updateProfile,updateProfilePicture,getProfile } = require("../controllers/userController");
+const { updateProfile,updateProfilePicture,getProfile } = require("../Controllers/userController");
 const authMiddleware = require("../middlewares/authMiddleware");
 
 router.get("/profile", authMiddleware, getProfile);
