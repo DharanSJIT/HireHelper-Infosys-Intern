@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { getProfile, updateProfile, updateProfilePicture } from "../config/api";
-import { Camera, User, Mail, Phone, Pencil, Check, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { changePassword, getProfile, updateProfile, updateProfilePicture } from "../config/api";
+import { Camera, User, Mail, Phone, Pencil, Check, X, Lock } from "lucide-react";
 
 const Settings = () => {
   const [profile, setProfile] = useState({});
@@ -8,6 +8,16 @@ const Settings = () => {
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError]     = useState("");
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [passwordModalClosing, setPasswordModalClosing] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
 
   const [form, setForm] = useState({
     first_name:   "",
@@ -33,9 +43,11 @@ const Settings = () => {
   };
 
   useEffect(() => { loadProfile(); }, []);
-
   /* ─── Input change ──────────────────────────────────────────── */
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handlePasswordChange = (e) => {
+    setPasswordForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
   /* ─── Save ──────────────────────────────────────────────────── */
   const handleSave = async () => {
@@ -64,6 +76,70 @@ const Settings = () => {
     });
     setEditMode(false);
     setSaveError("");
+  };
+
+  const openPasswordModal = () => {
+    setPasswordModalClosing(false);
+    setPasswordModalOpen(true);
+    setPasswordError("");
+    setPasswordSuccess("");
+  };
+
+  const closePasswordModal = useCallback(() => {
+    setPasswordModalClosing(true);
+    window.setTimeout(() => {
+      setPasswordModalOpen(false);
+      setPasswordModalClosing(false);
+      setPasswordLoading(false);
+      setPasswordError("");
+      setPasswordSuccess("");
+      setPasswordForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    }, 220);
+  }, []);
+
+  useEffect(() => {
+    if (!passwordModalOpen) return undefined;
+
+    const onEsc = (event) => {
+      if (event.key === "Escape") {
+        closePasswordModal();
+      }
+    };
+
+    window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
+  }, [passwordModalOpen, closePasswordModal]);
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    setPasswordError("");
+    setPasswordSuccess("");
+
+    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      setPasswordError("All password fields are required.");
+      return;
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError("New password and confirm password must match.");
+      return;
+    }
+
+    setPasswordLoading(true);
+
+    try {
+      const res = await changePassword(passwordForm);
+      setPasswordSuccess(res.data?.message || "Password updated successfully.");
+      window.setTimeout(() => closePasswordModal(), 700);
+    } catch (err) {
+      setPasswordError(err.response?.data?.message || "Failed to update password.");
+    } finally {
+      setPasswordLoading(false);
+    }
   };
 
   /* ─── Photo upload ──────────────────────────────────────────── */
@@ -260,8 +336,127 @@ const Settings = () => {
                 : "—"}
             </span>
           </div>
+          <div className="data-row border-b-0 pt-4">
+            <span className="text-sm font-medium text-slate-600">Password</span>
+            <button
+              type="button"
+              onClick={openPasswordModal}
+              className="btn-secondary text-sm px-4 py-2 rounded-2xl"
+            >
+              <Lock className="w-4 h-4" />
+              Change Password
+            </button>
+          </div>
         </div>
       </div>
+
+      {passwordModalOpen && (
+        <div className="settings-modal-wrap">
+          <button
+            type="button"
+            aria-label="Close change password modal"
+            onClick={closePasswordModal}
+            className={`settings-modal-backdrop ${passwordModalClosing ? "settings-modal-backdrop-exit" : "settings-modal-backdrop-enter"}`}
+          />
+
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="change-password-title"
+            className={`settings-modal-card ${passwordModalClosing ? "settings-modal-card-exit" : "settings-modal-card-enter"}`}
+          >
+            <div className="settings-modal-topline" />
+
+            <div className="settings-modal-head">
+              <div>
+                <h3 id="change-password-title" className="settings-modal-title">
+                  Change Password
+                </h3>
+                <p className="settings-modal-subtitle">Enter your current password and set a new one.</p>
+              </div>
+              <button
+                type="button"
+                onClick={closePasswordModal}
+                className="settings-modal-close"
+                aria-label="Close change password modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handlePasswordSubmit} className="settings-modal-form">
+              <div className="settings-modal-field">
+                <label htmlFor="currentPassword" className="settings-modal-label">Current Password</label>
+                <input
+                  id="currentPassword"
+                  type="password"
+                  name="currentPassword"
+                  value={passwordForm.currentPassword}
+                  onChange={handlePasswordChange}
+                  placeholder="Enter current password"
+                  autoComplete="current-password"
+                  className="settings-modal-input"
+                />
+              </div>
+
+              <div className="settings-modal-field">
+                <label htmlFor="newPassword" className="settings-modal-label">New Password</label>
+                <input
+                  id="newPassword"
+                  type="password"
+                  name="newPassword"
+                  value={passwordForm.newPassword}
+                  onChange={handlePasswordChange}
+                  placeholder="Enter new password"
+                  autoComplete="new-password"
+                  className="settings-modal-input"
+                />
+              </div>
+
+              <div className="settings-modal-field">
+                <label htmlFor="confirmPassword" className="settings-modal-label">Confirm New Password</label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  name="confirmPassword"
+                  value={passwordForm.confirmPassword}
+                  onChange={handlePasswordChange}
+                  placeholder="Confirm new password"
+                  autoComplete="new-password"
+                  className="settings-modal-input"
+                />
+              </div>
+
+              <p className="settings-modal-hint">
+                Password must include uppercase, lowercase, number, special character, and minimum 8 characters.
+              </p>
+
+              {passwordError && (
+                <div className="alert-error py-2.5">{passwordError}</div>
+              )}
+              {passwordSuccess && (
+                <div className="alert-success py-2.5">{passwordSuccess}</div>
+              )}
+
+              <div className="settings-modal-footer">
+                <button type="button" onClick={closePasswordModal} className="settings-modal-cancel">
+                  Cancel
+                </button>
+                <button type="submit" disabled={passwordLoading} className="btn-primary px-6 py-2.5 text-base rounded-xl">
+                  {passwordLoading ? (
+                    <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeDasharray="60" strokeDashoffset="20" />
+                    </svg>
+                  ) : (
+                    <Lock className="w-4 h-4" />
+                  )}
+                  Update Password
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );

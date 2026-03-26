@@ -68,6 +68,9 @@ export const getProfile = () =>
 export const updateProfile = (data) =>
   BASE_API.put("/users/update-profile", data);
 
+export const changePassword = (data) =>
+  BASE_API.put("/users/change-password", data);
+
 export const updateProfilePicture = (data) =>
   BASE_API.put("/users/profile-picture", data,{
     headers: {
