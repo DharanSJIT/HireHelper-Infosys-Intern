@@ -18,8 +18,16 @@ const addToken = (config) => {
    BASE API
 ===================================================== */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
-export const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || API_BASE_URL.replace(/\/api$/, "");
+const rawApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+const API_BASE_URL = (rawApiBaseUrl || "/api").replace(/\/+$/, "");
+
+const rawSocketUrl = import.meta.env.VITE_SOCKET_URL?.trim();
+const fallbackSocketUrl =
+  API_BASE_URL === "/api"
+    ? (typeof window !== "undefined" ? window.location.origin : "")
+    : API_BASE_URL.replace(/\/api$/, "");
+
+export const SOCKET_URL = rawSocketUrl || fallbackSocketUrl;
 
 const BASE_API = axios.create({
   baseURL: API_BASE_URL,
